@@ -1,38 +1,14 @@
-#ifndef HEADER_H
-#define HEADER_H
+#ifndef UTILS_H
+#define UTILS_H
 
-#define SDL_MAIN_USE_CALLBACKS 1
+#include "units.h"
+
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
 #include "Utils/sdl_utils.h"
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
 #include <stdbool.h>
-
-#define MAP_ROWS 18
-#define MAP_COLS 32
-
-#define TEXTURE_WIDTH 32
-#define TEXTURE_HEIGHT 32
-
-#define WINDOW_WIDTH 1600
-#define WINDOW_HEIGHT 900
-
-/////////
-/* MAP */
-/////////
-
-extern char map[MAP_ROWS][MAP_COLS];
-void loadMap();
-void renderMap();
-
-////////////////
-/* GAME LOGIC */
-////////////////
-
-#define TEXTURE_WIDTH 32
-#define TEXTURE_HEIGHT 32
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -43,24 +19,6 @@ typedef struct Camera
     float y;
 
 }Camera;
-
-typedef struct UnitStats
-{
-    char class[20]; // which class it is (for sprites)
-    int hp_current; // when this reaches 0, the unit 'dies'
-    int hp_max;
-    int def; // flat amount to reduce incoming damage by
-    int atk;
-    int pen; // % amount to ignore def during attacks
-    int mvm; // how many tiles the unit can move in the movement turn
-    int crit; // % chance for an attack to deal double damage
-    int range; // attack range in tiles
-    int deadzone; // specifically for the Archer class: area around the unit where attack is disabled, in tiles
-
-    int x;
-    int y;
-
-}UnitStats;
 
 typedef struct InputState
 {
@@ -107,7 +65,7 @@ typedef struct AppState
     SDL_Texture *tileGate;
 
     Camera *camera;
-    UnitStats *unit;
+    UnitStats *units;
     
     /* Timing */
     Uint64 lastTicksMS;

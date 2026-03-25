@@ -1,3 +1,5 @@
-game.o: game.c header.h Utils/sdl_utils.h
-header.h:
+game.o: game.c Utils/sdl_utils.h utils.h units.h map.h
 Utils/sdl_utils.h:
+utils.h:
+units.h:
+map.h:

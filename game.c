@@ -1,4 +1,15 @@
-#include "header.h"
+#define SDL_MAIN_USE_CALLBACKS 1
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+#include <SDL3_image/SDL_image.h>
+#include "Utils/sdl_utils.h"
+#include <SDL3_ttf/SDL_ttf.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+#include "utils.h"
+#include "map.h"
+#include "units.h"
 
 static void set_nearest(SDL_Texture *t)
 {
@@ -149,42 +160,20 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     AppState *app = (AppState *)appstate;
+
     // InputState *in = &app->input;
 
     // compute dt
     // Uint64 nowMS = SDL_GetTicks();
     // Uint64 elapsedMS = nowMS - app->lastTicksMS;
     // app->lastTicksMS = nowMS;
-    // SDL_FRect unitKnightBlue = {100, 100, 32, 32};
+    // SDL_FRect unitRect = {100, 100, 32, 32};
 
     SDL_RenderClear(app->renderer);
-    // renderMap(*appstate);
+    renderMap(app);
 
-    for (int x = 0; x < MAP_ROWS; x++)
-    {
-        for (int y = 0; y < MAP_COLS; y++)
-        {
-            SDL_FRect dst_rect = {TEXTURE_WIDTH * y, TEXTURE_HEIGHT + (TEXTURE_HEIGHT * x), TEXTURE_WIDTH, TEXTURE_HEIGHT};
-            if (map[x][y] == 'Z')
-            SDL_RenderTexture(app->renderer, app->tileGround, NULL, &dst_rect);
-            if (map[x][y] == 'W')
-            SDL_RenderTexture(app->renderer, app->tileWall, NULL, &dst_rect);
-            if (map[x][y] == 'R')
-            SDL_RenderTexture(app->renderer, app->tileRiver, NULL, &dst_rect);
-            if (map[x][y] == 'C')
-            SDL_RenderTexture(app->renderer, app->tileCapture, NULL, &dst_rect);
-            if (map[x][y] == 'G')
-            SDL_RenderTexture(app->renderer, app->tileGate, NULL, &dst_rect);
-            if (map[x][y] == 'T')
-            SDL_RenderTexture(app->renderer, app->tileTower, NULL, &dst_rect);
-            if (map[x][y] == 'H')
-            SDL_RenderTexture(app->renderer, app->tileHigh, NULL, &dst_rect);
-            if (map[x][y] == 'B')
-            SDL_RenderTexture(app->renderer, app->tileBush, NULL, &dst_rect);
-        }
-    }
-    //code
-    
+    // if (app->input.keyDown[SDL_SCANCODE_SPACE]) createUnit(1,1,1);
+
 
     SDL_RenderPresent(app->renderer);
 
@@ -206,6 +195,14 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
     if (app->spriteKnightBlue) SDL_DestroyTexture(app->spriteKnightBlue);
     if (app->spriteKnightRed) SDL_DestroyTexture(app->spriteKnightRed);
     if (app->spriteSBKnightBlue) SDL_DestroyTexture(app->spriteSBKnightBlue);
+    if (app->spriteSBKnightRed) SDL_DestroyTexture(app->spriteSBKnightRed);
+    if (app->tileGround) SDL_DestroyTexture(app->tileGround);
+    if (app->tileWall) SDL_DestroyTexture(app->tileWall);
+    if (app->tileRiver) SDL_DestroyTexture(app->tileRiver);
+    if (app->tileRiver) SDL_DestroyTexture(app->tileRiver);
+    if (app->tileBush) SDL_DestroyTexture(app->tileBush);   
+    if (app->tileTower) SDL_DestroyTexture(app->tileTower);
+    if (app->tileHigh) SDL_DestroyTexture(app->tileHigh);
     if (app->spriteSBKnightRed) SDL_DestroyTexture(app->spriteSBKnightRed);
 
     if (app->uiSettings) SDL_DestroyTexture(app->uiSettings);

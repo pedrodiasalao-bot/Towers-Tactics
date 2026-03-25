@@ -1,4 +1,5 @@
-#include "header.h"
+#include "utils.h"
+#include "map.h"
 
 char map[MAP_ROWS][MAP_COLS];
 /*
@@ -51,13 +52,15 @@ void loadMap(const char *filename)
     fclose(file);
 }
 
-void renderMap()
+void renderMap(AppState *app)
 {
+    
+    //LAYER 1
     for (int x = 0; x < MAP_ROWS; x++)
     {
         for (int y = 0; y < MAP_COLS; y++)
         {
-            SDL_FRect dst_rect = {TEXTURE_WIDTH * y, TEXTURE_HEIGHT + (TEXTURE_HEIGHT * x), TEXTURE_WIDTH, TEXTURE_HEIGHT};
+            SDL_FRect dst_rect = {TEXTURE_WIDTH * y, TEXTURE_HEIGHT * x, TEXTURE_WIDTH, TEXTURE_HEIGHT};
 
             if (map[x][y] == 'Z')
             SDL_RenderTexture(app->renderer, app->tileGround, NULL, &dst_rect);
@@ -69,6 +72,30 @@ void renderMap()
             SDL_RenderTexture(app->renderer, app->tileRiver, NULL, &dst_rect);
 
             if (map[x][y] == 'C')
+            SDL_RenderTexture(app->renderer, app->tileGround, NULL, &dst_rect);
+
+            if (map[x][y] == 'G')
+            SDL_RenderTexture(app->renderer, app->tileGround, NULL, &dst_rect);
+
+            if (map[x][y] == 'T')
+            SDL_RenderTexture(app->renderer, app->tileGround, NULL, &dst_rect);
+
+            if (map[x][y] == 'H')
+            SDL_RenderTexture(app->renderer, app->tileHigh, NULL, &dst_rect);
+
+            if (map[x][y] == 'B')
+            SDL_RenderTexture(app->renderer, app->tileGround, NULL, &dst_rect);
+        }
+    }
+
+    //LAYER 2
+    for (int x = 0; x < MAP_ROWS; x++)
+    {
+        for (int y = 0; y < MAP_COLS; y++)
+        {
+            SDL_FRect dst_rect = {TEXTURE_WIDTH * y, TEXTURE_HEIGHT * x, TEXTURE_WIDTH, TEXTURE_HEIGHT};
+
+            if (map[x][y] == 'C')
             SDL_RenderTexture(app->renderer, app->tileCapture, NULL, &dst_rect);
 
             if (map[x][y] == 'G')
@@ -76,9 +103,6 @@ void renderMap()
 
             if (map[x][y] == 'T')
             SDL_RenderTexture(app->renderer, app->tileTower, NULL, &dst_rect);
-
-            if (map[x][y] == 'H')
-            SDL_RenderTexture(app->renderer, app->tileHigh, NULL, &dst_rect);
 
             if (map[x][y] == 'B')
             SDL_RenderTexture(app->renderer, app->tileBush, NULL, &dst_rect);
