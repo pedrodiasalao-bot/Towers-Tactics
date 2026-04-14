@@ -64,8 +64,13 @@ typedef struct AppState
     SDL_Texture *tileHigh;
     SDL_Texture *tileGate;
 
+    /* Camera */
     Camera *camera;
-    UnitStats *units;
+
+    /* Units */
+    UnitStats units[50];
+    int unitCount; // Useful for distinguishing units
+    int selectedIndex; // So it's known what unit is currently selected (Useful for the moving)
     
     /* Timing */
     Uint64 lastTicksMS;

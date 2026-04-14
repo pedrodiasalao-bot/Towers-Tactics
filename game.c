@@ -169,6 +169,11 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     // app->lastTicksMS = nowMS;
     // SDL_FRect unitRect = {100, 100, 32, 32};
 
+    
+
+
+
+
     SDL_RenderClear(app->renderer);
     renderMap(app);
 
