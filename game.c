@@ -30,6 +30,23 @@ static void Input_BeginFrame(InputState *in)
     }
 }
 
+void endTurn(AppState *app) {
+
+    // Resetting all the unit movement so they can be moved again
+    for (int i = 0; i < app->unitCount; i++) { // Loops through all the units currently in the map
+        app->units[i].hasMoved = false;
+    }
+
+    app->turnCounter++; // Increases the turn counter. 
+
+    // Making the sides switch (0 = Blue; 1 = Red)
+    if (app->currentTurn == 0) {
+        app->currentTurn = 1;
+    } else {
+        app->currentTurn = 0;
+    }
+}
+
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
     (void)argc;
@@ -50,7 +67,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
     /* Create window + renderer once at startup */
-    if (!SDL_CreateWindowAndRenderer("Week 03 - Skeleton", WINDOW_WIDTH, WINDOW_HEIGHT, 0, &app->window, &app->renderer)) {
+    if (!SDL_CreateWindowAndRenderer("Towers and Tactics", WINDOW_WIDTH, WINDOW_HEIGHT, 0, &app->window, &app->renderer)) {
         SDL_Log("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -76,6 +93,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->tileTower = sdl_load_texture(app->renderer, "Assets/Art/Prototype/TL_PrototypeTower.png");
     app->tileGate = sdl_load_texture(app->renderer, "Assets/Art/Prototype/TL_PrototypeGate.png");
 
+    app->blueSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_BlueSelect.png");
+    app->redSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_RedSelect.png");
+
     set_nearest(app->spriteArcherBlue);
     set_nearest(app->spriteArcherRed);
     set_nearest(app->spriteCavBlue);
@@ -93,12 +113,18 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->tileHigh);
     set_nearest(app->tileTower);
     set_nearest(app->tileGate);
+    set_nearest(app->blueSelect);
+    set_nearest(app->redSelect);
 
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
 
+    app->unitCount = 0;
+    app->selectedIndex = -1;
     app->lastTicksMS = SDL_GetTicks();
+    createUnit(app, 1, 5, 5, 0); // Prototype Test (1 - Type; 5,5 - Position; 0 - Blue Team)
+    createUnit(app, 1, 8, 5, 1); 
 
     return SDL_APP_CONTINUE;
 }
@@ -142,8 +168,41 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         {
             if (!in->mouseLeftDown) in->mouseLeftPressed = true;
             in->mouseLeftDown = true;
+
+            // mouse.x and mouse.y = Coordinates of the button press
+            int gridX = (int)(event->button.x / TEXTURE_WIDTH);
+            int gridY = (int)(event->button.y / TEXTURE_HEIGHT);
+
+            if (app->input.mouseLeftPressed)
+        { 
+            // If unit is already picked up:
+            if(app->selectedIndex != -1)
+            { 
+                app->units[app->selectedIndex].x = gridX;
+                app->units[app->selectedIndex].y = gridY;
+                app->selectedIndex = -1; 
+            }else 
+    {
+            // If unit isn't already picked up, then pick it up.
+        for (int i = 0; i < app->unitCount; i++) 
+        {
+            if (app->units[i].x == gridX && app->units[i].y == gridY) 
+            {
+
+                if(app->units[i].team == app->currentTurn)
+                { 
+                app->selectedIndex = i;
+                break;
+                }else{
+                    printf("Wrong unit, wait for your turn");
+                }
         }
-        break;
+    } 
+        
+    } 
+    } 
+}
+
     case SDL_EVENT_MOUSE_BUTTON_UP:
         if (event->button.button == SDL_BUTTON_LEFT)
         {
@@ -151,6 +210,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             in->mouseLeftReleased = true;
         }
         break;
+
+    
     default:
         break;
     }
@@ -169,15 +230,16 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     // app->lastTicksMS = nowMS;
     // SDL_FRect unitRect = {100, 100, 32, 32};
 
-    
-
-
-
+    if (app->input.keyPressed[SDL_SCANCODE_SPACE])
+    {
+        endTurn(app);
+    }
 
     SDL_RenderClear(app->renderer);
     renderMap(app);
+    renderUnits(app);
 
-    // if (app->input.keyDown[SDL_SCANCODE_SPACE]) createUnit(1,1,1);
+   
 
 
     SDL_RenderPresent(app->renderer);

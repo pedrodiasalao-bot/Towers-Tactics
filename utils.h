@@ -36,6 +36,16 @@ typedef struct InputState
 
 }InputState;
 
+typedef enum {
+
+    STATE_MENU,
+    STATE_PAUSE,
+    STATE_PLAYING,
+    STATE_SPAWN_UNIT,
+    STATE_GAME_OVER,
+
+}GameState;
+
 typedef struct AppState
 {
     /* SDL objects */
@@ -63,6 +73,8 @@ typedef struct AppState
     SDL_Texture *tileTower;
     SDL_Texture *tileHigh;
     SDL_Texture *tileGate;
+    SDL_Texture *blueSelect;
+    SDL_Texture *redSelect;
 
     /* Camera */
     Camera *camera;
@@ -71,10 +83,19 @@ typedef struct AppState
     UnitStats units[50];
     int unitCount; // Useful for distinguishing units
     int selectedIndex; // So it's known what unit is currently selected (Useful for the moving)
+
+    /* Game Logic */
+    GameState currentState; // Game States
+    int currentTurn; // 0 - Blue Player /// 1 -  Red Player
+    int turnCounter;
     
     /* Timing */
     Uint64 lastTicksMS;
 
 }AppState;
+
+// Turn Based System
+
+void endTurn(AppState *app);
 
 #endif

@@ -1,12 +1,13 @@
 #ifndef UNITS_H
 #define UNITS_H
 
-#include "utils.h"
+#include <stdbool.h>
+
 
 typedef struct UnitStats
 {
   int id; // Differenciating Units
-  int type; // What class the unit is
+  int class; // What class the unit is
   int team; // 0 - Blue /// 1 - Red
 
   // Positioning
@@ -22,10 +23,13 @@ typedef struct UnitStats
 
 }UnitStats;
 
-void createUnit(AppState *app, int class, int x, int y);
-void renderUnits();
+typedef struct AppState AppState;
+
+void createUnit(AppState *app, int class, int x, int y, int team);
+void renderUnits(AppState *app);
 //determines and renders which tiles around the unit selected they can move to
-void movementTilesRange(int unitMovementTiles);
+void movementTilesRange(int unitX, int unitY, int movementRange);
+bool checkSurroundingTiles(char tile, int x, int y);
 //determines and renders which tiles around the unit selected they can attack
 void attackTilesRange(int unitAttackRange);
 void turnMechanics();
