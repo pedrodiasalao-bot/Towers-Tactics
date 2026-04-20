@@ -6,6 +6,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "utils.h"
 #include "map.h"
@@ -38,14 +39,65 @@ void endTurn(AppState *app) {
     }
 
     app->turnCounter++; // Increases the turn counter. 
-
+ 
     // Making the sides switch (0 = Blue; 1 = Red)
     if (app->currentTurn == 0) {
         app->currentTurn = 1;
     } else {
         app->currentTurn = 0;
     }
+
+    updateTextTexture(app);
+
 }
+
+void renderUI(AppState *app){
+    if (app->turnTextTexture){
+        float w, h;
+        SDL_GetTextureSize(app->turnTextTexture, &w, &h);
+
+        SDL_FRect dstRect = {(WINDOW_WIDTH / 2.0f) - (w / 2.0f), 20.0f, w, h};
+    
+        SDL_RenderTexture(app->renderer, app->turnTextTexture, NULL, &dstRect);
+}
+}
+
+
+
+bool allUnitsMoved (AppState *app) {
+    // Check to see if all units of the team in question has moved so the turn automatically ends
+    for (int i = 0; i < app->unitCount; i++){
+        if (app->units[i].team == app->currentTurn) {
+            if (!app->units[i].hasMoved){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void updateTextTexture (AppState *app){
+    // Changing the Text Color from Red to Blue or Blue to Red depending on whose turn it is
+
+    char message[32];
+    SDL_Color color;
+
+    if(app->currentTurn == 0) {
+        sprintf(message, "BLUE SIDE TURN");
+        color = (SDL_Color){0, 0, 255, 255};
+    }
+    if (app->currentTurn == 1){
+        sprintf(message, "RED SIDE TURN");
+        color = (SDL_Color){255, 0, 0, 255};
+    }
+ 
+    if (app->turnTextTexture) SDL_DestroyTexture(app->turnTextTexture);
+
+    SDL_Surface *surf = TTF_RenderText_Blended(app->font, message, 0, color);
+    if (surf) {
+        app->turnTextTexture = SDL_CreateTextureFromSurface(app->renderer, surf);
+        SDL_DestroySurface(surf);
+} }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
@@ -66,6 +118,10 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
+    if (!TTF_Init()) {
+    SDL_Log("TTF_Init failed: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+    }
     /* Create window + renderer once at startup */
     if (!SDL_CreateWindowAndRenderer("Towers and Tactics", WINDOW_WIDTH, WINDOW_HEIGHT, 0, &app->window, &app->renderer)) {
         SDL_Log("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());
@@ -96,6 +152,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->blueSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_BlueSelect.png");
     app->redSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_RedSelect.png");
 
+    app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
+
     set_nearest(app->spriteArcherBlue);
     set_nearest(app->spriteArcherRed);
     set_nearest(app->spriteCavBlue);
@@ -116,7 +174,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->blueSelect);
     set_nearest(app->redSelect);
 
-
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
 
@@ -125,9 +182,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->lastTicksMS = SDL_GetTicks();
     createUnit(app, 1, 5, 5, 0); // Prototype Test (1 - Type; 5,5 - Position; 0 - Blue Team)
     createUnit(app, 1, 8, 5, 1); 
+    createUnit(app, 1, 6, 6, 0);
+    createUnit(app, 1, 9, 9, 1);
+    updateTextTexture(app);
 
     return SDL_APP_CONTINUE;
-}
+} 
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
@@ -163,6 +223,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         in->mouseX = event->motion.x;
         in->mouseY = event->motion.y;
         break;
+
+    // UNIT MOVEMENT:
+
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
         if (event->button.button == SDL_BUTTON_LEFT)
         {
@@ -173,35 +236,51 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             int gridX = (int)(event->button.x / TEXTURE_WIDTH);
             int gridY = (int)(event->button.y / TEXTURE_HEIGHT);
 
+
+            char moveTile = map[gridY][gridX]; // Tile the unit is going to be moved to
+            bool isTileWalkable = (moveTile != 'W' && moveTile != 'R'); // Checks if the tile is a wall or river
+
             if (app->input.mouseLeftPressed)
         { 
-            // If unit is already picked up:
+            // If unit is already picked up (And if it hasn't moved yet):
             if(app->selectedIndex != -1)
-            { 
+            { if (app->units[app->selectedIndex].hasMoved == false){
+
+                // NOTE: Recycling the same logic used in unit.c
+                UnitStats *u = &app->units[app->selectedIndex];
+
+                int distance = abs(u->x - gridX) + abs(u->y - gridY); // Distance between unit coordenates and mouse click coordinates
+                
+                if (u->team == app->currentTurn && !u->hasMoved && distance <= u->mvm && isTileWalkable){
+               
+            {
                 app->units[app->selectedIndex].x = gridX;
-                app->units[app->selectedIndex].y = gridY;
+                app->units[app->selectedIndex].y = gridY;   
+                app->units[app->selectedIndex].hasMoved = true;
                 app->selectedIndex = -1; 
-            }else 
+            }}}}else 
     {
             // If unit isn't already picked up, then pick it up.
+            
         for (int i = 0; i < app->unitCount; i++) 
         {
             if (app->units[i].x == gridX && app->units[i].y == gridY) 
             {
-
+                if(app->units[i].team == app->currentTurn && !app->units[i].hasMoved)
+        {
                 if(app->units[i].team == app->currentTurn)
                 { 
                 app->selectedIndex = i;
                 break;
                 }else{
                     printf("Wrong unit, wait for your turn");
-                }
+                } }
         }
     } 
-        
-    } 
-    } 
+
 }
+    } 
+} break;
 
     case SDL_EVENT_MOUSE_BUTTON_UP:
         if (event->button.button == SDL_BUTTON_LEFT)
@@ -230,7 +309,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     // app->lastTicksMS = nowMS;
     // SDL_FRect unitRect = {100, 100, 32, 32};
 
-    if (app->input.keyPressed[SDL_SCANCODE_SPACE])
+    if (app->input.keyPressed[SDL_SCANCODE_SPACE] || allUnitsMoved(app))
     {
         endTurn(app);
     }
@@ -238,6 +317,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_RenderClear(app->renderer);
     renderMap(app);
     renderUnits(app);
+    renderUI(app);
 
    
 
@@ -276,7 +356,9 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 
     if (app->renderer) SDL_DestroyRenderer(app->renderer);
     if (app->window) SDL_DestroyWindow(app->window);
+    if (app->turnTextTexture) SDL_DestroyTexture(app->turnTextTexture);
+    if (app->font) TTF_CloseFont(app->font);
     TTF_Quit();
     SDL_Quit();
     SDL_free(app);
-}
+} 

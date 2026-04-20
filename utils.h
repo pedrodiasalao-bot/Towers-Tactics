@@ -92,10 +92,18 @@ typedef struct AppState
     /* Timing */
     Uint64 lastTicksMS;
 
+    /* Font */
+
+    TTF_Font *font;
+    SDL_Texture *turnTextTexture;
+
 }AppState;
 
 // Turn Based System
 
 void endTurn(AppState *app);
+bool allUnitsMoved (AppState *app);
+void updateTextTexture (AppState *app);
+void renderUI(AppState *app);
 
 #endif
