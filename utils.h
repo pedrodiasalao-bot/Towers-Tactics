@@ -105,5 +105,6 @@ void endTurn(AppState *app);
 bool allUnitsMoved (AppState *app);
 void updateTextTexture (AppState *app);
 void renderUI(AppState *app);
+void attackUnit(AppState *app, int attacker, int defender);
 
 #endif

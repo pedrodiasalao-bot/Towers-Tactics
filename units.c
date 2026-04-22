@@ -20,10 +20,26 @@ void createUnit(AppState *app, int class, int x, int y, int team)
         u->id = app->unitCount;
         u->x = x;
         u->y = y;
-        u->hp = 150;
-        u->mvm = 2;
-        u->range = 1;
         u->class = class; // 1 - knight; 2 - Archer; 3 - Cavalry
+
+        if (class == 1){ 
+            // Knight
+            u->hp = 150;
+            u->atk = 50;
+            u->mvm = 2;
+            u->range = 1;
+        } else if (class == 2){
+            u->hp = 50;
+            u->atk = 75;
+            u->mvm = 4;
+            u->range = 3;
+        } else if (class == 3){
+            u->hp = 100;
+            u->atk = 100;
+            u->mvm = 6;
+            u->range = 1;
+        }
+
         u->team = team; // Differs them between the Blue (0) and Red (0)
         u->hasMoved = false;
   
@@ -78,11 +94,22 @@ void renderUnits(AppState *app)
     }}
         // Render the Unit Sprite after the background squares so it's on top.
        if (u->team == 0) {
-
+        if (u->class == 1){
         SDL_RenderTexture(app->renderer, app->spriteKnightBlue, NULL, &dst_rect);
-        } else {
-        SDL_RenderTexture(app->renderer, app->spriteKnightRed, NULL, &dst_rect);
+        }else if (u->class == 2){
+        SDL_RenderTexture(app->renderer, app->spriteArcherBlue, NULL, &dst_rect);
+        }else if (u->class == 3){
+        SDL_RenderTexture(app->renderer, app->spriteCavBlue, NULL, &dst_rect);
         }
+        } else {
+        if (u->class == 1){
+        SDL_RenderTexture(app->renderer, app->spriteKnightRed, NULL, &dst_rect);
+        }else if (u->class == 2){
+        SDL_RenderTexture(app->renderer, app->spriteArcherRed, NULL, &dst_rect);
+        }else if (u->class == 3){
+        SDL_RenderTexture(app->renderer, app->spriteCavRed, NULL, &dst_rect);
+        }
+}
 }
 }
 

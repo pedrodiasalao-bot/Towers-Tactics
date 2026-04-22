@@ -7,8 +7,10 @@ MAP TILES:
     Z = Normal Ground Tile
     W = Wall
     R = River
-    C = Capture Point
-    G = Gate
+    1 = Capture Point Neutral
+    2 = Capture Point Left Team
+    3 = Capture Point Right team
+    G = Gate Intact
     T = Tower
     H = High Ground
     B = Bush
@@ -109,3 +111,22 @@ void renderMap(AppState *app)
         }
     }
 }
+/*
+void capturePointMechanics(AppState *app)
+{
+    //CAPTURE POINT 1
+    switch(map[16][2])
+    {
+        case 1:
+            for (int i = 0; i < app->unitCount; i++)
+            {
+                if (app.units[i].x == 16 || app.units[i].y == 2)
+                {
+                
+                }
+            }
+
+            break;
+    }
+}
+*/

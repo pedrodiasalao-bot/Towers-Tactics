@@ -8,6 +8,7 @@ typedef struct UnitStats
 {
   int id; // Differenciating Units
   int class; // What class the unit is
+  
   int team; // 0 - Blue /// 1 - Red
 
   // Positioning
@@ -16,6 +17,7 @@ typedef struct UnitStats
 
   // Stats (WILL ADD MORE, WIP)
   int hp;
+  int atk;
   int mvm;
   int range;
 
@@ -36,7 +38,7 @@ void turnMechanics();
 void movementPhase();
 void attackPhase();
 void destroyUnit();
-int damageCalc(int enemyHealth, int damage, int enemyDef, int pen);
+
 
 
 #endif

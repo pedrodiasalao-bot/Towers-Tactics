@@ -36,6 +36,7 @@ void endTurn(AppState *app) {
     // Resetting all the unit movement so they can be moved again
     for (int i = 0; i < app->unitCount; i++) { // Loops through all the units currently in the map
         app->units[i].hasMoved = false;
+    
     }
 
     app->turnCounter++; // Increases the turn counter. 
@@ -76,6 +77,25 @@ bool allUnitsMoved (AppState *app) {
     return true;
 }
 
+void attackUnit (AppState *app, int attacker, int defender){
+
+    UnitStats *atk = &app->units[attacker]; // Refers to the unit that's attacking
+    UnitStats *hp = &app->units[defender];  // Refers to the unit that's defending
+
+    hp->hp -= atk->atk; // Subtracts the defender's HP depending on the attacker's ATK stat
+
+    if (hp->hp <= 0){ // If unit dies, change the order of the array
+        for (int i = defender; i < app->unitCount - 1; i++){
+            app->units[i] = app->units[i + 1];
+        }
+    app->unitCount--; // Removes them from the Unit Count
+    }
+
+atk->hasMoved = true; // The attacker's move turn gets consumed
+app->selectedIndex = -1; // Unit is unselected
+
+}
+
 void updateTextTexture (AppState *app){
     // Changing the Text Color from Red to Blue or Blue to Red depending on whose turn it is
 
@@ -83,11 +103,11 @@ void updateTextTexture (AppState *app){
     SDL_Color color;
 
     if(app->currentTurn == 0) {
-        sprintf(message, "BLUE SIDE TURN");
+        sprintf(message, "BLUE MOVEMENT TURN");
         color = (SDL_Color){0, 0, 255, 255};
     }
     if (app->currentTurn == 1){
-        sprintf(message, "RED SIDE TURN");
+        sprintf(message, "RED MOVEMENT TURN");
         color = (SDL_Color){255, 0, 0, 255};
     }
  
@@ -180,10 +200,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->unitCount = 0;
     app->selectedIndex = -1;
     app->lastTicksMS = SDL_GetTicks();
-    createUnit(app, 1, 5, 5, 0); // Prototype Test (1 - Type; 5,5 - Position; 0 - Blue Team)
-    createUnit(app, 1, 8, 5, 1); 
-    createUnit(app, 1, 6, 6, 0);
-    createUnit(app, 1, 9, 9, 1);
+    createUnit(app, 1, 2, 16, 0); // Prototype Test (1 - Type; 5,5 - Position; 0 - Blue Team)
+    createUnit(app, 1, 30, 2, 1); 
+    createUnit(app, 2, 1, 15, 0);
+    createUnit(app, 2, 29, 1, 1);
+    createUnit(app, 3, 2, 15, 0);
+    createUnit(app, 3, 29, 2, 1);
     updateTextTexture(app);
 
     return SDL_APP_CONTINUE;
