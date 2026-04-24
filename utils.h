@@ -88,6 +88,17 @@ typedef struct AppState
     GameState currentState; // Game States
     int currentTurn; // 0 - Blue Player /// 1 -  Red Player
     int turnCounter;
+
+
+    bool isASingleUnitStandingInPoint;
+    int capPoint1Progress;
+    int capPoint2Progress;
+    int capPoint3Progress;
+    int capPoint4Progress;
+    int capPoint5Progress;
+    int capPoint6Progress;
+    int capPoint7Progress;
+    int capPoint8Progress;
     
     /* Timing */
     Uint64 lastTicksMS;

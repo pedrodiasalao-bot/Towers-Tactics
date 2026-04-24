@@ -12,5 +12,4 @@ void loadMap();
 void renderMap(AppState *app);
 void capturePointMechanics();
 
-
 #endif

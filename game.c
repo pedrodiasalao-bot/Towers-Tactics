@@ -12,6 +12,42 @@
 #include "map.h"
 #include "units.h"
 
+//DEBUG
+static void drawText(
+    SDL_Renderer* renderer,
+    float x,
+    float y,
+    float scale,
+    Uint8 r,
+    Uint8 g,
+    Uint8 b,
+    Uint8 a,
+    const char* text
+)
+{
+    float oldX, oldY;
+    Uint8 oldR, oldG, oldB, oldA;
+
+    SDL_GetRenderScale(renderer, &oldX, &oldY);
+    SDL_GetRenderDrawColor(renderer, &oldR, &oldG, &oldB, &oldA);
+
+    SDL_SetRenderScale(renderer, scale, scale);
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+    SDL_RenderDebugTextFormat(
+        renderer,
+        x / scale,
+        y / scale,
+        "%s",
+        text
+    );
+
+    // Restore previous state
+    SDL_SetRenderScale(renderer, oldX, oldY);
+    SDL_SetRenderDrawColor(renderer, oldR, oldG, oldB, oldA);
+}
+//DEBUG
+
 static void set_nearest(SDL_Texture *t)
 {
     if (t)
@@ -39,7 +75,7 @@ void endTurn(AppState *app) {
     
     }
 
-    app->turnCounter++; // Increases the turn counter. 
+    // app->turnCounter++; // Increases the turn counter.
  
     // Making the sides switch (0 = Blue; 1 = Red)
     if (app->currentTurn == 0) {
@@ -48,8 +84,13 @@ void endTurn(AppState *app) {
         app->currentTurn = 0;
     }
 
-    updateTextTexture(app);
+    if (app->currentTurn == 0)
+    {
+        app->turnCounter++;
+        capturePointMechanics(app);
+    }
 
+    updateTextTexture(app);
 }
 
 void renderUI(AppState *app){
@@ -197,7 +238,17 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
 
-    app->unitCount = 0;
+    app->isASingleUnitStandingInPoint = false;
+    app->capPoint1Progress = 0;
+    app->capPoint2Progress = 0;
+    app->capPoint3Progress = 0;
+    app->capPoint4Progress = 0;
+    app->capPoint5Progress = 0;
+    app->capPoint6Progress = 0;
+    app->capPoint7Progress = 0;
+    app->capPoint8Progress = 0;
+
+    app->unitCount = false;
     app->selectedIndex = -1;
     app->lastTicksMS = SDL_GetTicks();
     createUnit(app, 1, 2, 16, 0); // Prototype Test (1 - Type; 5,5 - Position; 0 - Blue Team)
@@ -332,7 +383,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     // SDL_FRect unitRect = {100, 100, 32, 32};
 
     if (app->input.keyPressed[SDL_SCANCODE_SPACE] || allUnitsMoved(app))
-    {
+    {       
         endTurn(app);
     }
 
@@ -340,10 +391,17 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     renderMap(app);
     renderUnits(app);
     renderUI(app);
-
    
-
-
+    char debugText1[50];
+    char debugText2[50];
+    char debugText3[50];
+    sprintf(debugText1, "Control Point Progress: %d\nCurrent Turn: %d", app->capPoint1Progress, app->turnCounter);
+    sprintf(debugText2, "Targeted Tile: %c", map[16][1]);
+    sprintf(debugText3, "First unit X: %d // First unit Y: %d", app->units[0].x, app->units[0].y);
+    drawText(app->renderer, 100, 100, 3, 0, 0, 0, 255, debugText1);
+    drawText(app->renderer, 100, 200, 3, 0, 0, 0, 255, debugText2);
+    drawText(app->renderer, 100, 300, 3, 0, 0, 0, 255, debugText3);
+    
     SDL_RenderPresent(app->renderer);
 
     // reset edge flags
