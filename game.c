@@ -316,22 +316,44 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             if (app->input.mouseLeftPressed)
         { 
             // If unit is already picked up (And if it hasn't moved yet):
-            if(app->selectedIndex != -1)
-            { if (app->units[app->selectedIndex].hasMoved == false){
+            if (app->selectedIndex != -1) 
+{
+    UnitStats *u = &app->units[app->selectedIndex];
+    int targetIdx = -1;
 
-                // NOTE: Recycling the same logic used in unit.c
-                UnitStats *u = &app->units[app->selectedIndex];
+    // 1. SEARCH: Is there a unit on the tile we clicked?
+    for (int i = 0; i < app->unitCount; i++) {
+        if (app->units[i].x == gridX && app->units[i].y == gridY) {
+            targetIdx = i;
+            break;
+        }
+    }
 
-                int distance = abs(u->x - gridX) + abs(u->y - gridY); // Distance between unit coordenates and mouse click coordinates
-                
-                if (u->team == app->currentTurn && !u->hasMoved && distance <= u->mvm && isTileWalkable){
-               
-            {
-                app->units[app->selectedIndex].x = gridX;
-                app->units[app->selectedIndex].y = gridY;   
-                app->units[app->selectedIndex].hasMoved = true;
-                app->selectedIndex = -1; 
-            }}}}else 
+    int distance = abs(u->x - gridX) + abs(u->y - gridY);
+
+    // Triggers if clicked on an enemy unit
+    if (targetIdx != -1 && app->units[targetIdx].team != u->team) 
+    {
+        if (distance <= u->range) {
+            attackUnit(app, app->selectedIndex, targetIdx); // The function we built earlier
+        } 
+    }
+    // Walks to spot if clicked on a walkable tile
+    else if (targetIdx == -1 && isTileWalkable) 
+    {
+        if (distance <= u->mvm) {
+            u->x = gridX;
+            u->y = gridY;
+            u->hasMoved = true;
+            app->selectedIndex = -1;
+        }
+    }
+    // Cancels movement if out of range or clicked on same team unit.
+    else 
+    {
+        app->selectedIndex = -1; 
+    }
+}else 
     {
             // If unit isn't already picked up, then pick it up.
             
@@ -345,8 +367,6 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                 { 
                 app->selectedIndex = i;
                 break;
-                }else{
-                    printf("Wrong unit, wait for your turn");
                 } }
         }
     } 
