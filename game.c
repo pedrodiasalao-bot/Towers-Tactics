@@ -48,11 +48,13 @@ static void drawText(
 }
 //DEBUG
 
+// Pedro
 static void set_nearest(SDL_Texture *t)
 {
     if (t)
     SDL_SetTextureScaleMode(t, SDL_SCALEMODE_NEAREST);
 }
+
 
 static void Input_BeginFrame(InputState *in)
 {
@@ -412,16 +414,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     renderUnits(app);
     renderUI(app);
    
-    char debugText1[50];
-    char debugText2[50];
-    char debugText3[50];
-    sprintf(debugText1, "Control Point Progress: %d\nCurrent Turn: %d", app->capPoint1Progress, app->turnCounter);
-    sprintf(debugText2, "Targeted Tile: %c", map[16][1]);
-    sprintf(debugText3, "First unit X: %d // First unit Y: %d", app->units[0].x, app->units[0].y);
-    drawText(app->renderer, 100, 100, 3, 0, 0, 0, 255, debugText1);
-    drawText(app->renderer, 100, 200, 3, 0, 0, 0, 255, debugText2);
-    drawText(app->renderer, 100, 300, 3, 0, 0, 0, 255, debugText3);
-    
     SDL_RenderPresent(app->renderer);
 
     // reset edge flags
