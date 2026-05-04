@@ -85,7 +85,7 @@ void renderUnits(AppState *app)
                         }
                     } else  if (distance > u->mvm && distance <= (u->mvm + u->range))
                     {
-                        SDL_RenderTexture(app->renderer, app->redSelect, NULL, &range_rect);
+                        SDL_RenderTexture(app->renderer, app->greenSelect, NULL, &range_rect);
                     }
 
 

@@ -75,6 +75,9 @@ typedef struct AppState
     SDL_Texture *tileGate;
     SDL_Texture *blueSelect;
     SDL_Texture *redSelect;
+    SDL_Texture *greenSelect;
+    SDL_Texture *tileCaptureRed;
+    SDL_Texture *tileCaptureBlue;
 
     /* Camera */
     Camera *camera;

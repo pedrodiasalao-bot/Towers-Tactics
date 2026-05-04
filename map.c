@@ -98,11 +98,11 @@ void renderMap(AppState *app)
             SDL_FRect dst_rect = {TEXTURE_WIDTH * y, TEXTURE_HEIGHT * x, TEXTURE_WIDTH, TEXTURE_HEIGHT};
 
             if (map[x][y] == '1')
-            SDL_RenderTexture(app->renderer, app->uiSettings, NULL, &dst_rect);
+            SDL_RenderTexture(app->renderer, app->tileCapture, NULL, &dst_rect);
             if (map[x][y] == '2')
-            SDL_RenderTexture(app->renderer, app->blueSelect, NULL, &dst_rect);
+            SDL_RenderTexture(app->renderer, app->tileCaptureBlue, NULL, &dst_rect);
             if (map[x][y] == '3')
-            SDL_RenderTexture(app->renderer, app->redSelect, NULL, &dst_rect);
+            SDL_RenderTexture(app->renderer, app->tileCaptureRed, NULL, &dst_rect);
 
             if (map[x][y] == 'G')
             SDL_RenderTexture(app->renderer, app->tileGate, NULL, &dst_rect);

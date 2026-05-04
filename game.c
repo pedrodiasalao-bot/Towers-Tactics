@@ -211,9 +211,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->tileHigh = sdl_load_texture(app->renderer, "Assets/Art/Prototype/TL_PrototypeHigh.png");
     app->tileTower = sdl_load_texture(app->renderer, "Assets/Art/Prototype/TL_PrototypeTower.png");
     app->tileGate = sdl_load_texture(app->renderer, "Assets/Art/Prototype/TL_PrototypeGate.png");
+    app->tileCaptureRed = sdl_load_texture(app->renderer, "Assets/Art/Prototype/TL_PrototypeCaptureRed.png");
+    app->tileCaptureBlue = sdl_load_texture(app->renderer, "Assets/Art/Prototype/TL_PrototypeCaptureBlue.png");
 
     app->blueSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_BlueSelect.png");
     app->redSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_RedSelect.png");
+    app->greenSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_GreenSelect.png");
 
     app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
 
@@ -236,6 +239,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->tileGate);
     set_nearest(app->blueSelect);
     set_nearest(app->redSelect);
+    set_nearest(app->greenSelect);
+    set_nearest(app->tileCaptureRed);
+    set_nearest(app->tileCaptureBlue);
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
