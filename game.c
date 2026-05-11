@@ -139,6 +139,8 @@ app->selectedIndex = -1; // Unit is unselected
 
 }
 
+
+
 void updateTextTexture (AppState *app){
     // Changing the Text Color from Red to Blue or Blue to Red depending on whose turn it is
 
@@ -217,6 +219,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->blueSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_BlueSelect.png");
     app->redSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_RedSelect.png");
     app->greenSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_GreenSelect.png");
+    app->uiSelect = sdl_load_texture(app->renderer, "Assets/Art/UI_Select.png");
 
     app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
 
@@ -242,6 +245,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->greenSelect);
     set_nearest(app->tileCaptureRed);
     set_nearest(app->tileCaptureBlue);
+    set_nearest(app->uiSelect);
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
@@ -325,11 +329,11 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         { 
             // If unit is already picked up (And if it hasn't moved yet):
             if (app->selectedIndex != -1) 
-{
+{ 
     UnitStats *u = &app->units[app->selectedIndex];
     int targetIdx = -1;
 
-    // 1. SEARCH: Is there a unit on the tile we clicked?
+    // Check if there is a unit on the tile we clicked
     for (int i = 0; i < app->unitCount; i++) {
         if (app->units[i].x == gridX && app->units[i].y == gridY) {
             targetIdx = i;
@@ -419,6 +423,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     renderMap(app);
     renderUnits(app);
     renderUI(app);
+    unitTileInteraction(app);
    
     SDL_RenderPresent(app->renderer);
 

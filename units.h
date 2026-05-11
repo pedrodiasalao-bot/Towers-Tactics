@@ -19,7 +19,8 @@ typedef struct UnitStats
   int hp;
   int atk;
   int mvm;
-  int range;
+  int range; // Current Range
+  int baseRange; // Needed to facilitate the Tower and High Ground range boosts
 
   bool hasMoved; // So you can't move a unit more than once
 
@@ -29,6 +30,7 @@ typedef struct AppState AppState;
 
 void createUnit(AppState *app, int class, int x, int y, int team);
 void renderUnits(AppState *app);
+void unitTileInteraction(AppState *app);
 //determines and renders which tiles around the unit selected they can move to
 void movementTilesRange(int unitX, int unitY, int movementRange);
 bool checkSurroundingTiles(char tile, int x, int y);

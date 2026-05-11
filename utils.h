@@ -78,6 +78,7 @@ typedef struct AppState
     SDL_Texture *greenSelect;
     SDL_Texture *tileCaptureRed;
     SDL_Texture *tileCaptureBlue;
+    SDL_Texture *uiSelect;
 
     /* Camera */
     Camera *camera;
@@ -120,5 +121,6 @@ bool allUnitsMoved (AppState *app);
 void updateTextTexture (AppState *app);
 void renderUI(AppState *app);
 void attackUnit(AppState *app, int attacker, int defender);
+
 
 #endif
