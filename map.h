@@ -11,5 +11,6 @@ extern char map[MAP_ROWS][MAP_COLS];
 void loadMap();
 void renderMap(AppState *app);
 void capturePointMechanics();
+// void captureProgress (int pointY, int pointX, AppState *app, int capPointID);
 
 #endif

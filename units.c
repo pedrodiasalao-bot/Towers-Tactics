@@ -1,6 +1,7 @@
 #include "utils.h"
 #include "units.h"
 #include "map.h"
+#include "cpathfinding.h"
 #include <stdlib.h>
 
 int damageCalc(int enemyHealth, int damage, int enemyDef, int pen)
@@ -24,19 +25,22 @@ void createUnit(AppState *app, int class, int x, int y, int team)
 
         if (class == 1){ 
             // Knight
-            u->hp = 150;
+            u->maxHP = 150;
+            u->currentHP = 150;
             u->atk = 50;
             u->mvm = 4;
             u->baseRange = 1;
             u->range = u->baseRange;
         } else if (class == 2){
-            u->hp = 50;
+            u->maxHP = 50;
+            u->currentHP = 50;
             u->atk = 75;
             u->mvm = 4;
             u->baseRange = 3;
             u->range = u->baseRange;
         } else if (class == 3){
-            u->hp = 100;
+            u->maxHP = 100;
+            u->currentHP = 100;
             u->atk = 100;
             u->mvm = 6;
             u->baseRange = 1;
@@ -69,58 +73,85 @@ void renderUnits(AppState *app)
         int mouseHoverY = (int)app->input.mouseY / TEXTURE_HEIGHT;
     
         // Visual Feedback for getting picked up
-        /* TO DO: CHANGE YELLOW OUTLINE TO blueSelect AND redSelect TILES */
-        if ((int)u->x == mouseHoverX && (int)u->y == mouseHoverY && u->hasMoved == false) {
-            
-
+        
+        if ((int)u->x == mouseHoverX && (int)u->y == mouseHoverY && u->hasMoved == false) 
+        {
             SDL_FRect hover_rect = {u->x * TEXTURE_WIDTH, u->y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT};
 
             SDL_RenderTexture(app->renderer, app->uiSelect, NULL, &hover_rect);
         }
         if (i == app->selectedIndex && u->hasMoved == false)
         {
-           
-            // NOTE: For the sake of not frankensteining radius tiles again like last project, I used outside help for the blue & red render tiles math.
-            for (int y = 0; y < MAP_ROWS; y++) 
-            {
-                for (int x = 0; x < MAP_COLS; x++) 
-                {
-                    int distance = abs(u->x - x) + abs(u->y - y);
-                    SDL_FRect range_rect = {x * TEXTURE_WIDTH, y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT};
-                    //NOTE: Same logic used in unit movement
 
-                    char tileRange = map[y][x];
-                    bool isTileWalkable = (tileRange != 'W' && tileRange != 'R');
+                CPath_Point reachable[MAP_ROWS * MAP_COLS];
 
-                    if (distance >= 0 && distance <= u->mvm)
-                    {
-                        if (isTileWalkable){
-                        SDL_RenderTexture(app->renderer, app->blueSelect, NULL, &range_rect);
+                int count = cpath_get_reachable_positions(
+                (int)u->x,         
+                (int)u->y,        
+                u->mvm,          
+                MAP_COLS,         
+                MAP_ROWS,          
+                map_is_walkable,   
+                map,               
+                reachable,          
+                MAP_ROWS * MAP_COLS 
+    );
+    
+   for (int y = 0; y < MAP_ROWS; y++) {
+                for (int x = 0; x < MAP_COLS; x++) {
 
-                        {
+                    if (map_is_walkable(x, y, map)) {
+                    bool inAttackRange = false; // Checks if it's within the RANGE stat
+
+                for (int p = 0; p < count; p++) {
+                        int dist = abs(reachable[p].x - x) + abs(reachable[p].y - y);
+                        if (dist <= u->range)    { 
+                            inAttackRange = true;
+                            break; 
+                        }
+                    }
+
+                    if (inAttackRange) {
+
+                        bool isWalkable = false;
+                        for (int p = 0; p < count; p++) {
+                          if (reachable[p].x == x && reachable[p].y == y) {
+
+                        isWalkable = true;
+
+                        break;
+                    }
+                }
+                    if (!isWalkable) {
+                        SDL_FRect red_rect = {x * TEXTURE_WIDTH, y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT};
+                        SDL_RenderTexture(app->renderer, app->redSelect, NULL, &red_rect);
+                        
+                    }
+                }
+            }
+        }
+   }
+        for (int p = 0; p < count; p++)
+        {
+                int x = reachable[p].x;
+                int y = reachable[p].y;
+                SDL_FRect range_rect = {x * TEXTURE_WIDTH, y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT};
+
+                SDL_RenderTexture(app->renderer, app->blueSelect, NULL, &range_rect);
+        
+ 
 
                         for (int j = 0; j < app->unitCount; j++) {
                         UnitStats *enemy = &app->units[j];
                         if (enemy->team != u->team && (int)enemy->x == x && (int)enemy->y == y){
                             SDL_RenderTexture(app->renderer, app->redSelect, NULL, &range_rect);
                         
+                             }
                         }
-                        }}}else{
-                            
-                        }
-                    } else  if (distance > u->mvm && distance <= (u->mvm + u->range))
-                    {
-                        SDL_RenderTexture(app->renderer, app->redSelect, NULL, &range_rect);
-
-                        
                     }
-                    
-                    
-
                 }
-          
-        }
-    }
+        
+            
 
         if (u->hasMoved){ 
             SDL_SetTextureAlphaMod(app->spriteKnightBlue, 128);
@@ -193,3 +224,118 @@ void unitTileInteraction(AppState *app) {
 }
 }
 }
+
+
+int map_is_walkable(int x, int y, void *map_data) 
+{
+    char (*tiles)[MAP_COLS] = map_data;
+    char tile = tiles[y][x];
+
+    return tile != 'W' && tile != 'R' && tile != 'D';
+}
+
+/*
+bool checkIfUnitIsUpgradeable(AppState *app, int i)
+{
+    if ((app->units[i].skillBranch1 + app->units[i].skillBranch2 + app->units[i].skillBranch3) == 5) return false;
+    else return ;
+}
+
+int obtainClickedUnitID(AppState *app, int gridX, int gridY)
+{
+    for (int i = 0; i < app->unitCount; i++)
+    {
+        if (app->units[i].x == gridX && app->units[i].y == gridY) return i;
+    }
+    
+    return 0;
+}
+
+void upgradeUnits(AppState *app, int i)
+{
+    if (app->units[i].class == 1)
+    {
+        switch (app->units[i].skillBranch1)
+        {
+            case 0:
+                break;
+            default:
+                app->units[i].maxHP = app->units[i].maxHP + 50;
+                if (app->units[i].currentHP == app->units[i].maxHP) app->units[i].currentHP = app->units[i].currentHP + 50;
+                break;
+        }
+        switch (app->units[i].skillBranch2)
+        {
+            case 0:
+                break;
+            default:
+                app->units[i].atk = app->units[i].atk + 25;
+                break;
+        }
+        switch (app->units[i].skillBranch3)
+        {
+            case 0:
+                break;
+            default:
+                //wip
+                break;
+        }
+    }
+    
+    if (app->units[i].class == 2)
+    {
+        switch (app->units[i].skillBranch1)
+        {
+            case 0:
+                break;
+            default:
+                app->units[i].atk = app->units[i].atk + 25;
+                break;
+        }
+        switch (app->units[i].skillBranch2)
+        {
+            case 0:
+                break;
+            default:
+                app->units[i].baseRange = app->units[i].baseRange + 1;
+                break;
+        }
+        switch (app->units[i].skillBranch3)
+        {
+            case 0:
+                break;
+            default:
+                //wip
+                break;
+        }
+    }
+
+    if (app->units[i].class == 3)
+    {
+        switch (app->units[i].skillBranch1)
+        {
+            case 0:
+                break;
+            default:
+                app->units[i].mvm = app->units[i].mvm + 1;
+                break;
+        }
+        switch (app->units[i].skillBranch2)
+        {
+            case 0:
+                break;
+            default:
+                //wip
+                break;
+        }
+        switch (app->units[i].skillBranch3)
+        {
+            case 0:
+                break;
+            default:
+                //wip
+                break;
+        }
+    }
+}
+*/

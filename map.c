@@ -115,8 +115,8 @@ void renderMap(AppState *app)
         }
     }
 }
-
-// Defines where capture points are in the map and activates the capturing mechanics for them.
+/*
+Defines where capture points are in the map and activates the capturing mechanics for them.
 void capturePointMechanics(AppState *app)
 {
     // Capture points are counted from left to right.
@@ -128,593 +128,74 @@ void capturePointMechanics(AppState *app)
     //CAPTURE POINT 1
     pointX = 1;
     pointY = 16;
-    switch (map[pointY][pointX])
-    {
-        case '1':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint1Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[pointY][pointX] = '2';
-                        app->capPoint1Progress = 0;
-                    }
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint1Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
-                {
-                    app->capPoint1Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint1Progress > 0) app->capPoint1Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '2':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint1Progress == 2)
-                {
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint1Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
-                {
-                    app->capPoint1Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint1Progress > 0) app->capPoint1Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '3':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint1Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[16][1] = '2';
-                        app->capPoint1Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
-                {
-                    app->capPoint1Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint1Progress > 0) app->capPoint1Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-    }
+    captureProgress(pointY, pointX, AppState *app, 1);
 
     //CAPTURE POINT 2
     pointX = 5;
     pointY = 1;
-    switch (map[pointY][pointX])
-    {
-        case '1':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint2Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[pointY][pointX] = '2';
-                        app->capPoint2Progress = 0;
-                    }
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint2Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
-                {
-                    app->capPoint2Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint2Progress > 0) app->capPoint2Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '2':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint2Progress == 2)
-                {
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint2Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
-                {
-                    app->capPoint2Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint2Progress > 0) app->capPoint2Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '3':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint2Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[16][1] = '2';
-                        app->capPoint2Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
-                {
-                    app->capPoint2Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint2Progress > 0) app->capPoint2Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-    }
+    captureProgress(pointY, pointX, AppState *app, 2);
 
     //CAPTURE POINT 3
     pointX = 10;
     pointY = 10;
-    switch (map[pointY][pointX])
-    {
-        case '1':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint3Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[pointY][pointX] = '2';
-                        app->capPoint3Progress = 0;
-                    }
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint3Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
-                {
-                    app->capPoint3Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint3Progress > 0) app->capPoint3Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '2':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint3Progress == 2)
-                {
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint3Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
-                {
-                    app->capPoint3Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint3Progress > 0) app->capPoint3Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '3':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint1Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[16][1] = '2';
-                        app->capPoint1Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
-                {
-                    app->capPoint1Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint1Progress > 0) app->capPoint1Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-    }
+    captureProgress(pointY, pointX, AppState *app, 3);
 
     //CAPTURE POINT 4
     pointX = 13;
     pointY = 3;
-    switch (map[pointY][pointX])
-    {
-        case '1':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint4Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[pointY][pointX] = '2';
-                        app->capPoint4Progress = 0;
-                    }
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint4Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
-                {
-                    app->capPoint4Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint4Progress > 0) app->capPoint4Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '2':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint4Progress == 2)
-                {
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint4Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
-                {
-                    app->capPoint4Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint4Progress > 0) app->capPoint4Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '3':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint4Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[16][1] = '2';
-                        app->capPoint4Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
-                {
-                    app->capPoint4Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint4Progress > 0) app->capPoint4Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-    }
+    captureProgress(pointY, pointX, AppState *app, 4);
 
     //CAPTURE POINT 5
     pointX = 18;
     pointY = 14;
-    switch (map[pointY][pointX])
-    {
-        case '1':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint5Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[pointY][pointX] = '2';
-                        app->capPoint5Progress = 0;
-                    }
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint5Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
-                {
-                    app->capPoint5Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint5Progress > 0) app->capPoint5Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '2':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint5Progress == 2)
-                {
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint5Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
-                {
-                    app->capPoint5Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint5Progress > 0) app->capPoint5Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '3':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint5Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[16][1] = '2';
-                        app->capPoint5Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
-                {
-                    app->capPoint5Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint5Progress > 0) app->capPoint5Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-    }
+    captureProgress(pointY, pointX, AppState *app, 5);
 
     //CAPTURE POINT 6
     pointX = 21;
     pointY = 7;
-    switch (map[pointY][pointX])
-    {
-        case '1':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint6Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[pointY][pointX] = '2';
-                        app->capPoint6Progress = 0;
-                    }
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint6Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
-                {
-                    app->capPoint6Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint6Progress > 0) app->capPoint6Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '2':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint6Progress == 2)
-                {
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint6Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
-                {
-                    app->capPoint6Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint6Progress > 0) app->capPoint6Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '3':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint6Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[16][1] = '2';
-                        app->capPoint6Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
-                {
-                    app->capPoint6Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint6Progress > 0) app->capPoint6Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-    }
+    captureProgress(pointY, pointX, AppState *app, 6);
 
     //CAPTURE POINT 7
     pointX = 26;
     pointY = 16;
-    switch (map[pointY][pointX])
-    {
-        case '1':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint7Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[pointY][pointX] = '2';
-                        app->capPoint7Progress = 0;
-                    }
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint7Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
-                {
-                    app->capPoint7Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint7Progress > 0) app->capPoint7Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '2':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint7Progress == 2)
-                {
-                    if (app->units[i].team == 1)
-                    {
-                        map[pointY][pointX] = '3';
-                        app->capPoint7Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
-                {
-                    app->capPoint7Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint7Progress > 0) app->capPoint7Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-        
-        case '3':
-            for (int i = 0; i < app->unitCount; i++)
-            {
-                // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint7Progress == 2)
-                {
-                    if (app->units[i].team == 0)
-                    {
-                        map[16][1] = '2';
-                        app->capPoint7Progress = 0;
-                    }
-                }
-                // capture progress
-                if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
-                {
-                    app->capPoint7Progress++;
-                    app->isASingleUnitStandingInPoint = true;
-                }
-            }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint7Progress > 0) app->capPoint7Progress = 0;
-            else app->isASingleUnitStandingInPoint = false;
-            break;
-    }
+    captureProgress(pointY, pointX, AppState *app, 7);
 
     //CAPTURE POINT 8
     pointX = 30;
     pointY = 1;
+    captureProgress(pointY, pointX, AppState *app, 8);
+
+}
+
+void captureProgress (int pointY, int pointX, AppState *app, int capPointID)
+{
     switch (map[pointY][pointX])
     {
         case '1':
             for (int i = 0; i < app->unitCount; i++)
             {
                 // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint8Progress == 2)
+                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPointProgress[capPointID] == 2)
                 {
                     if (app->units[i].team == 0)
                     {
                         map[pointY][pointX] = '2';
-                        app->capPoint8Progress = 0;
+                        app->capPointProgress[capPointID] = 0;
                     }
                     if (app->units[i].team == 1)
                     {
                         map[pointY][pointX] = '3';
-                        app->capPoint8Progress = 0;
+                        app->capPointProgress[capPointID] = 0;
                     }
                 }
                 // capture progress
                 if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '1')
                 {
-                    app->capPoint8Progress++;
+                    app->capPointProgress[capPointID]++;
                     app->isASingleUnitStandingInPoint = true;
                 }
             }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint8Progress > 0) app->capPoint8Progress = 0;
+            if (app->isASingleUnitStandingInPoint == false && app->capPointProgress[capPointID] > 0) app->capPointProgress[capPointID] = 0;
             else app->isASingleUnitStandingInPoint = false;
             break;
         
@@ -722,22 +203,22 @@ void capturePointMechanics(AppState *app)
             for (int i = 0; i < app->unitCount; i++)
             {
                 // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint8Progress == 2)
+                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPointProgress[capPointID] == 2)
                 {
                     if (app->units[i].team == 1)
                     {
                         map[pointY][pointX] = '3';
-                        app->capPoint8Progress = 0;
+                        app->capPointProgress[capPointID] = 0;
                     }
                 }
                 // capture progress
                 if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '2' && app->units[i].team == 1)
                 {
-                    app->capPoint8Progress++;
+                    app->capPointProgress[capPointID]++;
                     app->isASingleUnitStandingInPoint = true;
                 }
             }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint8Progress > 0) app->capPoint8Progress = 0;
+            if (app->isASingleUnitStandingInPoint == false && app->capPointProgress[capPointID] > 0) app->capPointProgress[capPointID] = 0;
             else app->isASingleUnitStandingInPoint = false;
             break;
         
@@ -745,24 +226,24 @@ void capturePointMechanics(AppState *app)
             for (int i = 0; i < app->unitCount; i++)
             {
                 // point capture
-                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPoint8Progress == 2)
+                if ((app->units[i].x == pointX && app->units[i].y == pointY) && app->capPointProgress[capPointID] == 2)
                 {
                     if (app->units[i].team == 0)
                     {
                         map[16][1] = '2';
-                        app->capPoint8Progress = 0;
+                        app->capPointProgress[capPointID] = 0;
                     }
                 }
                 // capture progress
                 if (app->units[i].x == pointX && app->units[i].y == pointY && map[pointY][pointX] == '3' && app->units[i].team == 0)
                 {
-                    app->capPoint8Progress++;
+                    app->capPointProgress[capPointID]++;
                     app->isASingleUnitStandingInPoint = true;
                 }
             }
-            if (app->isASingleUnitStandingInPoint == false && app->capPoint8Progress > 0) app->capPoint8Progress = 0;
+            if (app->isASingleUnitStandingInPoint == false && app->capPointProgress[capPointID] > 0) app->capPointProgress[capPointID] = 0;
             else app->isASingleUnitStandingInPoint = false;
             break;
     }
-
 }
+*/

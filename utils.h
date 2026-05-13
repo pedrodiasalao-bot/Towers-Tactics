@@ -79,6 +79,7 @@ typedef struct AppState
     SDL_Texture *tileCaptureRed;
     SDL_Texture *tileCaptureBlue;
     SDL_Texture *uiSelect;
+    SDL_Texture *uiSettingsHover;
 
     /* Camera */
     Camera *camera;
@@ -95,14 +96,7 @@ typedef struct AppState
 
 
     bool isASingleUnitStandingInPoint;
-    int capPoint1Progress;
-    int capPoint2Progress;
-    int capPoint3Progress;
-    int capPoint4Progress;
-    int capPoint5Progress;
-    int capPoint6Progress;
-    int capPoint7Progress;
-    int capPoint8Progress;
+    // int capPointProgress[9];
     
     /* Timing */
     Uint64 lastTicksMS;
@@ -111,6 +105,8 @@ typedef struct AppState
 
     TTF_Font *font;
     SDL_Texture *turnTextTexture;
+
+
 
 }AppState;
 
@@ -121,6 +117,7 @@ bool allUnitsMoved (AppState *app);
 void updateTextTexture (AppState *app);
 void renderUI(AppState *app);
 void attackUnit(AppState *app, int attacker, int defender);
+void update(AppState *app);
 
 
 #endif

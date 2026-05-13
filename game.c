@@ -89,20 +89,35 @@ void endTurn(AppState *app) {
     if (app->currentTurn == 0)
     {
         app->turnCounter++;
-        capturePointMechanics(app);
+        // capturePointMechanics(app);
     }
 
     updateTextTexture(app);
 }
 
 void renderUI(AppState *app){
+
+    // Turn Text
     if (app->turnTextTexture){
         float w, h;
         SDL_GetTextureSize(app->turnTextTexture, &w, &h);
-
         SDL_FRect dstRect = {(WINDOW_WIDTH / 2.0f) - (w / 2.0f), 20.0f, w, h};
-    
         SDL_RenderTexture(app->renderer, app->turnTextTexture, NULL, &dstRect);
+
+    // Settings Button
+
+    SDL_FRect buttonRect = { WINDOW_WIDTH - 80.0f, 20.0f, 64.0f, 64.0f };
+
+    bool hovered = (app->input.mouseX >= buttonRect.x && 
+                    app->input.mouseX <= buttonRect.x + buttonRect.w &&
+                    app->input.mouseY >= buttonRect.y && 
+                    app->input.mouseY <= buttonRect.y + buttonRect.h);
+
+    if(hovered){
+    SDL_RenderTexture(app->renderer, app->uiSettingsHover, NULL, &buttonRect);
+    }else{
+    SDL_RenderTexture(app->renderer, app->uiSettings, NULL, &buttonRect);
+    }
 }
 }
 
@@ -123,11 +138,11 @@ bool allUnitsMoved (AppState *app) {
 void attackUnit (AppState *app, int attacker, int defender){
 
     UnitStats *atk = &app->units[attacker]; // Refers to the unit that's attacking
-    UnitStats *hp = &app->units[defender];  // Refers to the unit that's defending
+    UnitStats *currentHP = &app->units[defender];  // Refers to the unit that's defending
 
-    hp->hp -= atk->atk; // Subtracts the defender's HP depending on the attacker's ATK stat
+    currentHP->currentHP -= atk->atk; // Subtracts the defender's HP depending on the attacker's ATK stat
 
-    if (hp->hp <= 0){ // If unit dies, change the order of the array
+    if (currentHP->currentHP <= 0){ // If unit dies, change the order of the array
         for (int i = defender; i < app->unitCount - 1; i++){
             app->units[i] = app->units[i + 1];
         }
@@ -137,6 +152,22 @@ void attackUnit (AppState *app, int attacker, int defender){
 atk->hasMoved = true; // The attacker's move turn gets consumed
 app->selectedIndex = -1; // Unit is unselected
 
+}
+
+void update(AppState *app) {
+
+    switch(app->currentState) {
+        case STATE_MENU:
+            if (app->input.mouseLeftDown) {
+                app->currentState = STATE_PLAYING;
+
+            }
+         break;
+
+      
+        
+        
+    }
 }
 
 
@@ -220,6 +251,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->redSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_RedSelect.png");
     app->greenSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_GreenSelect.png");
     app->uiSelect = sdl_load_texture(app->renderer, "Assets/Art/UI_Select.png");
+    app->uiSettingsHover = sdl_load_texture(app->renderer, "Assets/Art/UI_SettingsHovered.png");
 
     app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
 
@@ -246,19 +278,13 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->tileCaptureRed);
     set_nearest(app->tileCaptureBlue);
     set_nearest(app->uiSelect);
+    set_nearest(app->uiSettingsHover);
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
 
     app->isASingleUnitStandingInPoint = false;
-    app->capPoint1Progress = 0;
-    app->capPoint2Progress = 0;
-    app->capPoint3Progress = 0;
-    app->capPoint4Progress = 0;
-    app->capPoint5Progress = 0;
-    app->capPoint6Progress = 0;
-    app->capPoint7Progress = 0;
-    app->capPoint8Progress = 0;
+    // app->capPointProgress[9];
 
     app->unitCount = false;
     app->selectedIndex = -1;
@@ -312,15 +338,20 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     // UNIT MOVEMENT:
 
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
-        if (event->button.button == SDL_BUTTON_LEFT)
-        {
+        if (app->currentState == STATE_MENU) {
+          if (event->button.button == SDL_BUTTON_LEFT)
+        {   
+            app->currentState = STATE_PLAYING;
+        }
+
+
+    }else if (app->currentState == STATE_PLAYING){
             if (!in->mouseLeftDown) in->mouseLeftPressed = true;
             in->mouseLeftDown = true;
 
             // mouse.x and mouse.y = Coordinates of the button press
             int gridX = (int)(event->button.x / TEXTURE_WIDTH);
             int gridY = (int)(event->button.y / TEXTURE_HEIGHT);
-
 
             char moveTile = map[gridY][gridX]; // Tile the unit is going to be moved to
             bool isTileWalkable = (moveTile != 'W' && moveTile != 'R'); // Checks if the tile is a wall or river
@@ -406,13 +437,13 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 {
     AppState *app = (AppState *)appstate;
 
-    // InputState *in = &app->input;
-
-    // compute dt
-    // Uint64 nowMS = SDL_GetTicks();
-    // Uint64 elapsedMS = nowMS - app->lastTicksMS;
-    // app->lastTicksMS = nowMS;
-    // SDL_FRect unitRect = {100, 100, 32, 32};
+    if (app->currentState == STATE_MENU) {
+        SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+        SDL_RenderClear(app->renderer);
+        drawText(app->renderer, WINDOW_WIDTH/2 - 350, WINDOW_HEIGHT/2, 5.0f, 255, 255, 255, 255, "TOWERS AND TACTICS");
+        drawText(app->renderer, WINDOW_WIDTH/2 - 75, WINDOW_HEIGHT/2 + 120, 1.0f, 255, 255, 255, 255, "CLICK TO START");
+    }else if (app->currentState == STATE_PLAYING)
+    {
 
     if (app->input.keyPressed[SDL_SCANCODE_SPACE] || allUnitsMoved(app))
     {       
@@ -424,7 +455,10 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     renderUnits(app);
     renderUI(app);
     unitTileInteraction(app);
-   
+}
+
+
+
     SDL_RenderPresent(app->renderer);
 
     // reset edge flags

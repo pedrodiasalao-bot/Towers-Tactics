@@ -16,13 +16,22 @@ typedef struct UnitStats
   int y;
 
   // Stats (WILL ADD MORE, WIP)
-  int hp;
+  int maxHP;
+  int currentHP;
   int atk;
   int mvm;
   int range; // Current Range
   int baseRange; // Needed to facilitate the Tower and High Ground range boosts
 
   bool hasMoved; // So you can't move a unit more than once
+
+  /*
+  // these track how far along the skill tree a unit is
+  // max points is 5 (for now)
+  int skillBranch1;
+  int skillBranch2;
+  int skillBranch3;
+  */
 
 }UnitStats;
 
@@ -40,7 +49,13 @@ void turnMechanics();
 void movementPhase();
 void attackPhase();
 void destroyUnit();
+int map_is_walkable(int x, int y, void *map_data);
 
+/*
+bool checkIfUnitIsUpgradeable(AppState *app, int i);
+void upgradeUnits(AppState *app, int i);
+int obtainUnitID(AppState *app, int gridX, int gridY);
+*/
 
 
 #endif
