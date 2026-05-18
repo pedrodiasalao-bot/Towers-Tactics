@@ -106,7 +106,7 @@ void renderUI(AppState *app){
 
     // Settings Button
 
-    SDL_FRect buttonRect = { WINDOW_WIDTH - 80.0f, 20.0f, 64.0f, 64.0f };
+    SDL_FRect buttonRect = {20.0f, 20.0f, 64.0f, 64.0f };
 
     bool hovered = (app->input.mouseX >= buttonRect.x && 
                     app->input.mouseX <= buttonRect.x + buttonRect.w &&
@@ -118,7 +118,36 @@ void renderUI(AppState *app){
     }else{
     SDL_RenderTexture(app->renderer, app->uiSettings, NULL, &buttonRect);
     }
+
+    // Skill Tree Button
+
+    float treeW = TEXTURE_WIDTH * 3.0f;
+    float treeH = TEXTURE_HEIGHT * 3.0f;
+
+    SDL_FRect treeRect = { WINDOW_WIDTH - treeW, WINDOW_HEIGHT - treeH, treeW, treeH};
+
+    // When you select a unit, the tree becomes full opacity
+    Uint8 alphaValue = 128;
+    if (app->selectedIndex != -1) {
+        alphaValue = 255;
+    }
+    
+    bool treeHovered = (app->input.mouseX >= treeRect.x && 
+                    app->input.mouseX <= treeRect.x + treeRect.w &&
+                    app->input.mouseY >= treeRect.y && 
+                    app->input.mouseY <= treeRect.y + treeRect.h);
+
+  
+    if (treeHovered && app->selectedIndex != -1) {
+        SDL_SetTextureAlphaMod(app->uiSkillTreeHover, alphaValue);
+        SDL_RenderTexture(app->renderer, app->uiSkillTreeHover, NULL, &treeRect);
+          }
+    else{
+        SDL_SetTextureAlphaMod(app->uiSkillTree, alphaValue);
+        SDL_RenderTexture(app->renderer, app->uiSkillTree, NULL, &treeRect);
+    }
 }
+ 
 }
 
 
@@ -252,6 +281,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->greenSelect = sdl_load_texture(app->renderer, "Assets/Art/SP_GreenSelect.png");
     app->uiSelect = sdl_load_texture(app->renderer, "Assets/Art/UI_Select.png");
     app->uiSettingsHover = sdl_load_texture(app->renderer, "Assets/Art/UI_SettingsHovered.png");
+    app->uiSkillTree = sdl_load_texture(app->renderer, "Assets/Art/UI_SkillTree.png");
+    app->uiSkillTreeHover = sdl_load_texture(app->renderer, "Assets/Art/UI_SkillTreeHover.png");
+
 
     app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
 
@@ -279,12 +311,20 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->tileCaptureBlue);
     set_nearest(app->uiSelect);
     set_nearest(app->uiSettingsHover);
+    set_nearest(app->uiSkillTree);
+    set_nearest(app->uiSkillTreeHover);
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
 
     app->isASingleUnitStandingInPoint = false;
     // app->capPointProgress[9];
+
+    // Camera Initialization
+    app->cameraX = WINDOW_WIDTH / 2.0f;
+    app->cameraY = WINDOW_HEIGHT / 2.0f;
+    app->zoom = 1.0f;
+    app->isDragging = false;
 
     app->unitCount = false;
     app->selectedIndex = -1;
@@ -297,6 +337,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     createUnit(app, 3, 29, 2, 1);
     updateTextTexture(app);
 
+   
+   
     return SDL_APP_CONTINUE;
 } 
 
@@ -330,28 +372,94 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             }
         }
         break;
+
     case SDL_EVENT_MOUSE_MOTION:
         in->mouseX = event->motion.x;
         in->mouseY = event->motion.y;
+
+        if (app->isDragging && app->currentState == STATE_PLAYING) {
+            float deltaX = event->motion.x - app->lastMouseX;
+            float deltaY = event->motion.y - app->lastMouseY;
+
+            // Camera Drag
+            app->cameraX -= deltaX / app->zoom;
+            app->cameraY -= deltaY / app->zoom;
+
+
+            // Making sure players can't zoom or drag out of borders
+            float worldWidthPixels = MAP_COLS * TEXTURE_WIDTH;
+            float worldHeightPixels = MAP_ROWS * TEXTURE_HEIGHT;
+
+            float minCamX = (WINDOW_WIDTH / 2.0f) / app->zoom;
+            float minCamY = (WINDOW_HEIGHT / 2.0f) / app->zoom;
+
+            float maxCamX = worldWidthPixels - minCamX;
+            float maxCamY = worldHeightPixels - minCamY;
+
+            if (maxCamX < minCamX) {
+                app->cameraX = worldWidthPixels / 2.0f;
+            } else {
+                if (app->cameraX < minCamX) app->cameraX = minCamX;
+                if (app->cameraX > maxCamX) app->cameraX = maxCamX;
+            }
+
+            if (maxCamY < minCamY) {
+                app->cameraY = worldHeightPixels / 2.0f;
+            } else {
+                if (app->cameraY < minCamY) app->cameraY = minCamY;
+                if (app->cameraY > maxCamY) app->cameraY = maxCamY;
+            }
+
+            app->lastMouseX = event->motion.x;
+            app->lastMouseY = event->motion.y;
+        }
+
         break;
 
+    // CAMERA MOVEMENT:
+case SDL_EVENT_MOUSE_WHEEL:
+
+    if (app->currentState == STATE_PLAYING) {
+
+        if (event->wheel.y > 0) {
+            app->zoom += 0.3f;
+        } else if (event->wheel.y < 0) {
+            app->zoom -= 0.3f;
+    }
+        if (app->zoom < 1.0f) app->zoom = 1.0f;
+        if (app->zoom > 5.0f) app->zoom = 5.0f;
+            
+    }
+    break;
     // UNIT MOVEMENT:
 
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
+
+     if(event->button.button == SDL_BUTTON_RIGHT && app->currentState == STATE_PLAYING) {
+            app->isDragging = true;
+            app->lastMouseX = event->button.x;
+            app->lastMouseY = event->button.y;
+
+            return SDL_APP_CONTINUE;
+        }
+
         if (app->currentState == STATE_MENU) {
           if (event->button.button == SDL_BUTTON_LEFT)
         {   
             app->currentState = STATE_PLAYING;
         }
 
-
     }else if (app->currentState == STATE_PLAYING){
             if (!in->mouseLeftDown) in->mouseLeftPressed = true;
             in->mouseLeftDown = true;
 
+            float centerX = WINDOW_WIDTH / 2.0f;
+            float centerY = WINDOW_HEIGHT / 2.0f;
             // mouse.x and mouse.y = Coordinates of the button press
-            int gridX = (int)(event->button.x / TEXTURE_WIDTH);
-            int gridY = (int)(event->button.y / TEXTURE_HEIGHT);
+            // NOTE: Adapted for camera movement
+            
+            int gridX = (int)(((event->button.x - centerX) / app->zoom + app->cameraX) / TEXTURE_WIDTH);
+            int gridY = (int)(((event->button.y - centerY) / app->zoom + app->cameraY) / TEXTURE_HEIGHT);
 
             char moveTile = map[gridY][gridX]; // Tile the unit is going to be moved to
             bool isTileWalkable = (moveTile != 'W' && moveTile != 'R'); // Checks if the tile is a wall or river
@@ -377,10 +485,17 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     // Triggers if clicked on an enemy unit
     if (targetIdx != -1 && app->units[targetIdx].team != u->team) 
     {
+        char defenderTile = map[app->units[targetIdx].y][app->units[targetIdx].x];
+        bool isHidingBush = (u->class == 2 && defenderTile == 'B');            // Checks if unit is sitting on a bush
+
         if (distance <= u->range) {
+            if (isHidingBush){
+
+            }else{
             attackUnit(app, app->selectedIndex, targetIdx); // The function we built earlier
         } 
     }
+}
     // Walks to spot if clicked on a walkable tile
     else if (targetIdx == -1 && isTileWalkable) 
     {
@@ -423,8 +538,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         {
             in->mouseLeftDown    = false;
             in->mouseLeftReleased = true;
+        }   
+
+        if (event->button.button == SDL_BUTTON_RIGHT)
+        {
+            app->isDragging = false;
         }
         break;
+
 
     
     default:
@@ -442,6 +563,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         SDL_RenderClear(app->renderer);
         drawText(app->renderer, WINDOW_WIDTH/2 - 350, WINDOW_HEIGHT/2, 5.0f, 255, 255, 255, 255, "TOWERS AND TACTICS");
         drawText(app->renderer, WINDOW_WIDTH/2 - 75, WINDOW_HEIGHT/2 + 120, 1.0f, 255, 255, 255, 255, "CLICK TO START");
+
     }else if (app->currentState == STATE_PLAYING)
     {
 

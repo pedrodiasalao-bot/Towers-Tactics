@@ -63,22 +63,31 @@ void createUnit(AppState *app, int class, int x, int y, int team)
 
 void renderUnits(AppState *app)
 {
+    // Recycled logic from renderMap
+    float centerX = WINDOW_WIDTH / 2.0f;
+    float centerY = WINDOW_HEIGHT / 2.0f;
+    float scaledW = TEXTURE_WIDTH * app->zoom;
+    float scaledH = TEXTURE_HEIGHT * app->zoom;
+
+    // For unit select UI, translates mouseX into grid base
+    int mouseHoverX = (int)(((app->input.mouseX - centerX) / app->zoom + app->cameraX) / TEXTURE_WIDTH);
+    int mouseHoverY = (int)(((app->input.mouseY - centerY) / app->zoom + app->cameraY) / TEXTURE_HEIGHT);
+
     for (int i = 0; i < app->unitCount; i++) // Cycles between all the current units
     {
         UnitStats *u = &app->units[i];
-        SDL_FRect dst_rect = {u->x * TEXTURE_WIDTH, u->y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT}; // So the units snap to the grid
 
-        // For unit select UI, translates mouseX into grid base
-        int mouseHoverX = (int)app->input.mouseX / TEXTURE_WIDTH;
-        int mouseHoverY = (int)app->input.mouseY / TEXTURE_HEIGHT;
+        float unitScreenX = centerX + ((u->x * TEXTURE_WIDTH) - app->cameraX) * app->zoom;
+        float unitScreenY = centerY + ((u->y * TEXTURE_WIDTH) - app->cameraY) * app->zoom;
+        SDL_FRect dst_rect = { unitScreenX, unitScreenY, scaledW, scaledH }; // So the units snap to the grid
+
     
         // Visual Feedback for getting picked up
         
         if ((int)u->x == mouseHoverX && (int)u->y == mouseHoverY && u->hasMoved == false) 
         {
-            SDL_FRect hover_rect = {u->x * TEXTURE_WIDTH, u->y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT};
 
-            SDL_RenderTexture(app->renderer, app->uiSelect, NULL, &hover_rect);
+            SDL_RenderTexture(app->renderer, app->uiSelect, NULL, &dst_rect);
         }
         if (i == app->selectedIndex && u->hasMoved == false)
         {
@@ -123,7 +132,9 @@ void renderUnits(AppState *app)
                     }
                 }
                     if (!isWalkable) {
-                        SDL_FRect red_rect = {x * TEXTURE_WIDTH, y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT};
+                        float redScreenX = centerX + ((x * TEXTURE_WIDTH) - app->cameraX) * app->zoom;
+                        float redScreenY = centerY + ((y * TEXTURE_HEIGHT) - app->cameraY) * app->zoom;
+                        SDL_FRect red_rect = { redScreenX, redScreenY, scaledW, scaledH };
                         SDL_RenderTexture(app->renderer, app->redSelect, NULL, &red_rect);
                         
                     }
@@ -135,7 +146,10 @@ void renderUnits(AppState *app)
         {
                 int x = reachable[p].x;
                 int y = reachable[p].y;
-                SDL_FRect range_rect = {x * TEXTURE_WIDTH, y * TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT};
+
+                float blueScreenX = centerX + ((x * TEXTURE_WIDTH) - app->cameraX) * app->zoom;
+                float blueScreenY = centerY + ((y * TEXTURE_HEIGHT) - app->cameraY) * app->zoom;
+                SDL_FRect range_rect = { blueScreenX, blueScreenY, scaledW, scaledH };
 
                 SDL_RenderTexture(app->renderer, app->blueSelect, NULL, &range_rect);
         
@@ -144,6 +158,13 @@ void renderUnits(AppState *app)
                         for (int j = 0; j < app->unitCount; j++) {
                         UnitStats *enemy = &app->units[j];
                         if (enemy->team != u->team && (int)enemy->x == x && (int)enemy->y == y){
+
+                            char enemyTile = map[y][x];
+                            if (u->class == 2 && enemyTile == 'B'){ // If unit is in archer's range AND in bush
+                                continue;
+                            }
+
+
                             SDL_RenderTexture(app->renderer, app->redSelect, NULL, &range_rect);
                         
                              }

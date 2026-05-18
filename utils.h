@@ -80,9 +80,17 @@ typedef struct AppState
     SDL_Texture *tileCaptureBlue;
     SDL_Texture *uiSelect;
     SDL_Texture *uiSettingsHover;
+    SDL_Texture *uiSkillTree;
+    SDL_Texture *uiSkillTreeHover;
 
     /* Camera */
-    Camera *camera;
+    float cameraX;
+    float cameraY;
+    float zoom;
+
+    bool isDragging; // Checks if the mouse is dragging the map
+    float lastMouseX;
+    float lastMouseY;
 
     /* Units */
     UnitStats units[50];

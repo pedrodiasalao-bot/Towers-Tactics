@@ -57,12 +57,22 @@ void loadMap(const char *filename)
 void renderMap(AppState *app)
 {
     
+    float centerX = WINDOW_WIDTH / 2.0f;
+    float centerY = WINDOW_HEIGHT / 2.0f;
+
+    float scaledW = TEXTURE_WIDTH * app->zoom;
+    float scaledH = TEXTURE_HEIGHT * app->zoom;
+
+
     //LAYER 1
     for (int x = 0; x < MAP_ROWS; x++)
     {
         for (int y = 0; y < MAP_COLS; y++)
         {
-            SDL_FRect dst_rect = {TEXTURE_WIDTH * y, TEXTURE_HEIGHT * x, TEXTURE_WIDTH, TEXTURE_HEIGHT};
+            float screenX = centerX + ((y * TEXTURE_WIDTH) - app->cameraX) * app->zoom;
+            float screenY = centerY + ((x * TEXTURE_HEIGHT) - app->cameraY) * app->zoom;
+
+            SDL_FRect dst_rect = { screenX, screenY, scaledW, scaledH };
 
             if (map[x][y] == 'Z')
             SDL_RenderTexture(app->renderer, app->tileGround, NULL, &dst_rect);
@@ -95,7 +105,10 @@ void renderMap(AppState *app)
     {
         for (int y = 0; y < MAP_COLS; y++)
         {
-            SDL_FRect dst_rect = {TEXTURE_WIDTH * y, TEXTURE_HEIGHT * x, TEXTURE_WIDTH, TEXTURE_HEIGHT};
+            float screenX = centerX + ((y * TEXTURE_WIDTH) - app->cameraX) * app->zoom;
+            float screenY = centerY + ((x * TEXTURE_HEIGHT) - app->cameraY) * app->zoom;
+
+            SDL_FRect dst_rect = { screenX, screenY, scaledW, scaledH };
 
             if (map[x][y] == '1')
             SDL_RenderTexture(app->renderer, app->tileCapture, NULL, &dst_rect);
