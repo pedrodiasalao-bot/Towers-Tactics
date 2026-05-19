@@ -25,13 +25,11 @@ typedef struct UnitStats
 
   bool hasMoved; // So you can't move a unit more than once
 
-  /*
   // these track how far along the skill tree a unit is
   // max points is 5 (for now)
   int skillBranch1;
   int skillBranch2;
   int skillBranch3;
-  */
 
 }UnitStats;
 
@@ -51,12 +49,9 @@ void attackPhase();
 void destroyUnit();
 int map_is_walkable(int x, int y, void *map_data);
 
-/*
 bool checkIfUnitIsUpgradeable(AppState *app, int i);
-void upgradeUnits(AppState *app, int i);
-int obtainUnitID(AppState *app, int gridX, int gridY);
-*/
-
+void upgradeUnits(AppState *app, int t);
+int obtainClickedUnitID(AppState *app, int gridX, int gridY);
 
 #endif
 

@@ -104,7 +104,7 @@ typedef struct AppState
 
 
     bool isASingleUnitStandingInPoint;
-    // int capPointProgress[9];
+    int capPointProgress[9];
     
     /* Timing */
     Uint64 lastTicksMS;

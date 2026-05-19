@@ -32,6 +32,7 @@ void createUnit(AppState *app, int class, int x, int y, int team)
             u->baseRange = 1;
             u->range = u->baseRange;
         } else if (class == 2){
+            // Archer
             u->maxHP = 50;
             u->currentHP = 50;
             u->atk = 75;
@@ -39,6 +40,7 @@ void createUnit(AppState *app, int class, int x, int y, int team)
             u->baseRange = 3;
             u->range = u->baseRange;
         } else if (class == 3){
+            // Cavalry
             u->maxHP = 100;
             u->currentHP = 100;
             u->atk = 100;
@@ -255,11 +257,10 @@ int map_is_walkable(int x, int y, void *map_data)
     return tile != 'W' && tile != 'R' && tile != 'D';
 }
 
-/*
 bool checkIfUnitIsUpgradeable(AppState *app, int i)
 {
-    if ((app->units[i].skillBranch1 + app->units[i].skillBranch2 + app->units[i].skillBranch3) == 5) return false;
-    else return ;
+    if ((app->units[i].skillBranch1 + app->units[i].skillBranch2 + app->units[i].skillBranch3) == 3) return false;
+    else return true;
 }
 
 int obtainClickedUnitID(AppState *app, int gridX, int gridY)
@@ -268,95 +269,101 @@ int obtainClickedUnitID(AppState *app, int gridX, int gridY)
     {
         if (app->units[i].x == gridX && app->units[i].y == gridY) return i;
     }
-    
     return 0;
 }
 
-void upgradeUnits(AppState *app, int i)
+// Applies upgraded stats across all classes for a team
+void upgradeUnits(AppState *app, int t)
 {
-    if (app->units[i].class == 1)
+    for (int i = 0; i < app->unitCount; i++)
     {
-        switch (app->units[i].skillBranch1)
+        // KNIGHT UPGRADES
+        if (app->units[i].class == 1 && app->units[i].team == t)
         {
-            case 0:
-                break;
-            default:
-                app->units[i].maxHP = app->units[i].maxHP + 50;
-                if (app->units[i].currentHP == app->units[i].maxHP) app->units[i].currentHP = app->units[i].currentHP + 50;
-                break;
+            switch (app->units[i].skillBranch1)
+            {
+                case 0:
+                    break;
+                case 1:
+                    if (app->units[i].currentHP == app->units[i].maxHP) app->units[i].currentHP = 200;
+                    app->units[i].maxHP = 200;
+                    break;
+            }
+            switch (app->units[i].skillBranch2)
+            {
+                case 0:
+                    break;
+                case 1:
+                    app->units[i].atk = 75;
+                    break;
+            }
+            switch (app->units[i].skillBranch3)
+            {
+                case 0:
+                    break;
+                case 1:
+                    app->units[i].baseRange = 2;
+                    break;
+            }
         }
-        switch (app->units[i].skillBranch2)
-        {
-            case 0:
-                break;
-            default:
-                app->units[i].atk = app->units[i].atk + 25;
-                break;
-        }
-        switch (app->units[i].skillBranch3)
-        {
-            case 0:
-                break;
-            default:
-                //wip
-                break;
-        }
-    }
-    
-    if (app->units[i].class == 2)
-    {
-        switch (app->units[i].skillBranch1)
-        {
-            case 0:
-                break;
-            default:
-                app->units[i].atk = app->units[i].atk + 25;
-                break;
-        }
-        switch (app->units[i].skillBranch2)
-        {
-            case 0:
-                break;
-            default:
-                app->units[i].baseRange = app->units[i].baseRange + 1;
-                break;
-        }
-        switch (app->units[i].skillBranch3)
-        {
-            case 0:
-                break;
-            default:
-                //wip
-                break;
-        }
-    }
 
-    if (app->units[i].class == 3)
-    {
-        switch (app->units[i].skillBranch1)
+        // ARCHER UPGRADES
+        if (app->units[i].class == 2 && app->units[i].team == t)
         {
-            case 0:
-                break;
-            default:
-                app->units[i].mvm = app->units[i].mvm + 1;
-                break;
+            switch (app->units[i].skillBranch1)
+            {
+                case 0:
+                    break;
+                case 1:
+                    app->units[i].atk = 100;
+                    break;
+            }
+            switch (app->units[i].skillBranch2)
+            {
+                case 0:
+                    break;
+                case 1:
+                    app->units[i].baseRange = 4;
+                    break;
+            }
+            switch (app->units[i].skillBranch3)
+            {
+                case 0:
+                    break;
+                case 1:
+                    if (app->units[i].currentHP == app->units[i].maxHP) app->units[i].currentHP = 75;
+                    app->units[i].maxHP = 75;
+                    break;
+            }
         }
-        switch (app->units[i].skillBranch2)
+
+        // CAVALRY UPGRADES
+        if (app->units[i].class == 3 && app->units[i].team == t)
         {
-            case 0:
-                break;
-            default:
-                //wip
-                break;
-        }
-        switch (app->units[i].skillBranch3)
-        {
-            case 0:
-                break;
-            default:
-                //wip
-                break;
+            switch (app->units[i].skillBranch1)
+            {
+                case 0:
+                    break;
+                case 1:
+                    app->units[i].mvm = 7;
+                    break;
+            }
+            switch (app->units[i].skillBranch2)
+            {
+                case 0:
+                    break;
+                case 1:
+                    app->units[i].atk = 125;
+                    break;
+            }
+            switch (app->units[i].skillBranch3)
+            {
+                case 0:
+                    break;
+                case 1:
+                    app->units[i].baseRange = 2;
+                    break;
+            }
         }
     }
-}
-*/
+}   

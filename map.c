@@ -128,8 +128,8 @@ void renderMap(AppState *app)
         }
     }
 }
-/*
-Defines where capture points are in the map and activates the capturing mechanics for them.
+
+// Defines where capture points are in the map and activates the capturing mechanics for them.
 void capturePointMechanics(AppState *app)
 {
     // Capture points are counted from left to right.
@@ -141,42 +141,42 @@ void capturePointMechanics(AppState *app)
     //CAPTURE POINT 1
     pointX = 1;
     pointY = 16;
-    captureProgress(pointY, pointX, AppState *app, 1);
+    captureProgress(pointY, pointX, app, 1);
 
     //CAPTURE POINT 2
     pointX = 5;
     pointY = 1;
-    captureProgress(pointY, pointX, AppState *app, 2);
+    captureProgress(pointY, pointX, app, 2);
 
     //CAPTURE POINT 3
     pointX = 10;
     pointY = 10;
-    captureProgress(pointY, pointX, AppState *app, 3);
+    captureProgress(pointY, pointX, app, 3);
 
     //CAPTURE POINT 4
     pointX = 13;
     pointY = 3;
-    captureProgress(pointY, pointX, AppState *app, 4);
+    captureProgress(pointY, pointX, app, 4);
 
     //CAPTURE POINT 5
     pointX = 18;
     pointY = 14;
-    captureProgress(pointY, pointX, AppState *app, 5);
+    captureProgress(pointY, pointX, app, 5);
 
     //CAPTURE POINT 6
     pointX = 21;
     pointY = 7;
-    captureProgress(pointY, pointX, AppState *app, 6);
+    captureProgress(pointY, pointX, app, 6);
 
     //CAPTURE POINT 7
     pointX = 26;
     pointY = 16;
-    captureProgress(pointY, pointX, AppState *app, 7);
+    captureProgress(pointY, pointX, app, 7);
 
     //CAPTURE POINT 8
     pointX = 30;
     pointY = 1;
-    captureProgress(pointY, pointX, AppState *app, 8);
+    captureProgress(pointY, pointX, app, 8);
 
 }
 
@@ -259,4 +259,3 @@ void captureProgress (int pointY, int pointX, AppState *app, int capPointID)
             break;
     }
 }
-*/
