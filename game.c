@@ -89,6 +89,12 @@ void endTurn(AppState *app) {
     if (app->currentTurn == 0)
     {
         app->turnCounter++;
+
+        if(app->turnCounter % 3 == 0)
+    {
+        createUnit(app, (rand() % 3) + 1, 1, 16, 0); // Prototype Test (1 - Type; 5,5 - Position; 0 - Blue Team)
+        createUnit(app, (rand() % 3) + 1, 30, 1, 1);
+    }
         // capturePointMechanics(app);
     }
 
@@ -119,6 +125,8 @@ void renderUI(AppState *app){
     SDL_RenderTexture(app->renderer, app->uiSettings, NULL, &buttonRect);
     }
 
+    
+
     // Skill Tree Button
 
     float treeW = TEXTURE_WIDTH * 3.0f;
@@ -146,6 +154,17 @@ void renderUI(AppState *app){
         SDL_SetTextureAlphaMod(app->uiSkillTree, alphaValue);
         SDL_RenderTexture(app->renderer, app->uiSkillTree, NULL, &treeRect);
     }
+
+    // EXP Ball 
+
+    float expW = TEXTURE_WIDTH * 0.6f;
+    float expH = TEXTURE_HEIGHT * 0.6f;
+
+    SDL_FRect expRect = {WINDOW_WIDTH - treeW - expW, WINDOW_HEIGHT - (expH + 10.0f), expW, expH};
+
+    SDL_RenderTexture(app->renderer, app->uiExperiencePoint, NULL, &expRect);
+    
+    //   drawText(app->renderer, WINDOW_WIDTH/2 - 75, WINDOW_HEIGHT/2 + 120, 3.0f, 255, 255, 255, 255, "QUIT");
 }
  
 }
@@ -283,6 +302,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->uiSettingsHover = sdl_load_texture(app->renderer, "Assets/Art/UI_SettingsHovered.png");
     app->uiSkillTree = sdl_load_texture(app->renderer, "Assets/Art/UI_SkillTree.png");
     app->uiSkillTreeHover = sdl_load_texture(app->renderer, "Assets/Art/UI_SkillTreeHover.png");
+    app->uiExperiencePoint = sdl_load_texture(app->renderer, "Assets/Art/UI_ExperiencePoint.png");
 
 
     app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
@@ -313,6 +333,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->uiSettingsHover);
     set_nearest(app->uiSkillTree);
     set_nearest(app->uiSkillTreeHover);
+    set_nearest(app->uiExperiencePoint);
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
@@ -427,7 +448,7 @@ case SDL_EVENT_MOUSE_WHEEL:
             app->zoom -= 0.3f;
     }
         if (app->zoom < 1.0f) app->zoom = 1.0f;
-        if (app->zoom > 5.0f) app->zoom = 5.0f;
+        if (app->zoom > 2.0f) app->zoom = 2.0f;
             
     }
     break;
@@ -443,15 +464,27 @@ case SDL_EVENT_MOUSE_WHEEL:
             return SDL_APP_CONTINUE;
         }
 
-        if (app->currentState == STATE_MENU) {
+        if (app->currentState == STATE_MENU || app->currentState == STATE_PAUSE) {
           if (event->button.button == SDL_BUTTON_LEFT)
         {   
             app->currentState = STATE_PLAYING;
         }
+        
 
     }else if (app->currentState == STATE_PLAYING){
             if (!in->mouseLeftDown) in->mouseLeftPressed = true;
             in->mouseLeftDown = true;
+
+            SDL_FRect buttonRect = {20.0f, 20.0f, 64.0f, 64.0f };
+
+            if (event->button.x >= buttonRect.x && 
+                event->button.x <= buttonRect.x + buttonRect.w &&
+                event->button.y >= buttonRect.y && 
+                event->button.y <= buttonRect.y + buttonRect.h) {
+                    app->currentState = STATE_PAUSE;
+                    return SDL_APP_CONTINUE;
+                }
+
 
             float centerX = WINDOW_WIDTH / 2.0f;
             float centerY = WINDOW_HEIGHT / 2.0f;
@@ -563,6 +596,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         SDL_RenderClear(app->renderer);
         drawText(app->renderer, WINDOW_WIDTH/2 - 350, WINDOW_HEIGHT/2, 5.0f, 255, 255, 255, 255, "TOWERS AND TACTICS");
         drawText(app->renderer, WINDOW_WIDTH/2 - 75, WINDOW_HEIGHT/2 + 120, 1.0f, 255, 255, 255, 255, "CLICK TO START");
+        drawText(app->renderer, 40, WINDOW_HEIGHT/3, 1.5f, 255, 255, 255, 255, "Win Conditions:\n\n -> Capture Enemy Base Flag\nOR\nCapture All Map Flags\n\n\nControls:\n\nLEFT CLICK: Click on units to move them\nSPACE: Skip Turn\nSCROLL WHEEL: Zoom in and out");
 
     }else if (app->currentState == STATE_PLAYING)
     {
@@ -576,10 +610,27 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     renderMap(app);
     renderUnits(app);
     renderUI(app);
+ 
     unitTileInteraction(app);
+
+}  else if (app->currentState == STATE_PAUSE){
+
+        SDL_RenderClear(app->renderer);
+        renderMap(app);
+        renderUnits(app);
+        renderUI(app);
+
+        SDL_SetRenderDrawBlendMode(app->renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 125);
+
+        SDL_FRect screenOverlay = {0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT};
+        SDL_RenderFillRect(app->renderer, &screenOverlay);
+
+        drawText(app->renderer, WINDOW_WIDTH/2 - 110, WINDOW_HEIGHT/2, 3.0f, 255, 255, 255, 255, "CONTINUE");
+        drawText(app->renderer, WINDOW_WIDTH/2 - 75, WINDOW_HEIGHT/2 + 120, 3.0f, 255, 255, 255, 255, "QUIT");
+
+
 }
-
-
 
     SDL_RenderPresent(app->renderer);
 

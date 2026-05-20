@@ -82,6 +82,7 @@ typedef struct AppState
     SDL_Texture *uiSettingsHover;
     SDL_Texture *uiSkillTree;
     SDL_Texture *uiSkillTreeHover;
+    SDL_Texture *uiExperiencePoint;
 
     /* Camera */
     float cameraX;
@@ -126,6 +127,6 @@ void updateTextTexture (AppState *app);
 void renderUI(AppState *app);
 void attackUnit(AppState *app, int attacker, int defender);
 void update(AppState *app);
-
+void tempUnitSpawn(AppState *app);
 
 #endif
