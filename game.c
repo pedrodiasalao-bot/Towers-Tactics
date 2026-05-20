@@ -95,7 +95,7 @@ void endTurn(AppState *app) {
         createUnit(app, (rand() % 3) + 1, 1, 16, 0); // Prototype Test (1 - Type; 5,5 - Position; 0 - Blue Team)
         createUnit(app, (rand() % 3) + 1, 30, 1, 1);
     }
-        // capturePointMechanics(app);
+        capturePointMechanics(app);
     }
 
     updateTextTexture(app);
@@ -164,7 +164,7 @@ void renderUI(AppState *app){
 
     SDL_RenderTexture(app->renderer, app->uiExperiencePoint, NULL, &expRect);
     
-    //   drawText(app->renderer, WINDOW_WIDTH/2 - 75, WINDOW_HEIGHT/2 + 120, 3.0f, 255, 255, 255, 255, "QUIT");
+    // drawText(app->renderer, WINDOW_WIDTH/2 - 75, WINDOW_HEIGHT/2 + 120, 3.0f, 255, 255, 255, 255, "QUIT");
 }
  
 }
@@ -303,6 +303,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->uiSkillTree = sdl_load_texture(app->renderer, "Assets/Art/UI_SkillTree.png");
     app->uiSkillTreeHover = sdl_load_texture(app->renderer, "Assets/Art/UI_SkillTreeHover.png");
     app->uiExperiencePoint = sdl_load_texture(app->renderer, "Assets/Art/UI_ExperiencePoint.png");
+    app->skillTreeMenuBase = sdl_load_texture(app->renderer, "Assets/Art/skillTree.png");
 
 
     app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
@@ -334,6 +335,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->uiSkillTree);
     set_nearest(app->uiSkillTreeHover);
     set_nearest(app->uiExperiencePoint);
+    set_nearest(app->skillTreeMenuBase);
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
@@ -632,6 +634,26 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 }
 
+    else if (app->currentState == STATE_SKILL_MENU)
+    {
+
+        SDL_RenderClear(app->renderer);
+        renderMap(app);
+        renderUnits(app);
+        renderUI(app);
+
+        SDL_SetRenderDrawBlendMode(app->renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 125);
+
+        SDL_FRect screenOverlay = {0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT};
+        SDL_RenderFillRect(app->renderer, &screenOverlay);
+
+        drawText(app->renderer, WINDOW_WIDTH/2 - 110, WINDOW_HEIGHT/2, 3.0f, 255, 255, 255, 255, "CONTINUE");
+
+        SDL_FRect skillTreeRect = {100.0f, 100.0f, 200.0f, 200.0f};
+        SDL_RenderTexture(app->renderer, app->skillTreeMenuBase, NULL, &skillTreeRect);
+    }
+
     SDL_RenderPresent(app->renderer);
 
     // reset edge flags
@@ -661,6 +683,7 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
     if (app->tileTower) SDL_DestroyTexture(app->tileTower);
     if (app->tileHigh) SDL_DestroyTexture(app->tileHigh);
     if (app->spriteSBKnightRed) SDL_DestroyTexture(app->spriteSBKnightRed);
+    if (app->skillTreeMenuBase) SDL_DestroyTexture(app->skillTreeMenuBase);
 
     if (app->uiSettings) SDL_DestroyTexture(app->uiSettings);
 

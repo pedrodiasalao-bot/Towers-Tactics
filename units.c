@@ -257,10 +257,28 @@ int map_is_walkable(int x, int y, void *map_data)
     return tile != 'W' && tile != 'R' && tile != 'D';
 }
 
-bool checkIfUnitIsUpgradeable(AppState *app, int i)
+// Checks if a single unit has an upgrade in the map, then returns a bool.
+bool checkIfUnitHasBeenUpgraded(AppState *app, int class, int branch, int team)
 {
-    if ((app->units[i].skillBranch1 + app->units[i].skillBranch2 + app->units[i].skillBranch3) == 3) return false;
-    else return true;
+    for (int i = 0; i < app->unitCount; i++)
+    {
+        if (app->units[i].class == class && app->units[i].team == team)
+        {
+            switch (branch)
+            {
+                case 1:
+                    if (app->units[i].skillBranch1 == 1) return true;
+                    break;
+                case 2:
+                    if (app->units[i].skillBranch2 == 1) return true;
+                    break;
+                case 3:
+                    if (app->units[i].skillBranch3 == 1) return true;
+                    break;
+            }
+        }
+    }
+    return false;
 }
 
 int obtainClickedUnitID(AppState *app, int gridX, int gridY)
@@ -272,7 +290,31 @@ int obtainClickedUnitID(AppState *app, int gridX, int gridY)
     return 0;
 }
 
-// Applies upgraded stats across all classes for a team
+// This function makes it so all units of the same class and team have the same branch on their stats.
+// Afterwards, the upgradeUnits function will apply stats to all units of the team who have that branch.
+void applyBranchToAllUnits(AppState *app, int t, int class, int branch)
+{
+    for (int i = 0; i < app->unitCount; i++)
+    {
+        if (app->units[i].class == class && app->units[i].team == t)
+        {
+            switch (branch)
+            {
+                case 1:
+                    app->units[i].skillBranch1 = 1;
+                    break;
+                case 2:
+                    app->units[i].skillBranch2 = 1;
+                    break;
+                case 3:
+                    app->units[i].skillBranch3 = 1;
+                    break;
+            }
+        }
+    }
+}
+
+// Applies upgraded stats to all classes of a team as long as they have the corresponding skill branch active.
 void upgradeUnits(AppState *app, int t)
 {
     for (int i = 0; i < app->unitCount; i++)
@@ -284,7 +326,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 1st Upgrade
                     if (app->units[i].currentHP == app->units[i].maxHP) app->units[i].currentHP = 200;
                     app->units[i].maxHP = 200;
                     break;
@@ -293,7 +335,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 2nd Upgrade
                     app->units[i].atk = 75;
                     break;
             }
@@ -301,7 +343,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 3rd Upgrade
                     app->units[i].baseRange = 2;
                     break;
             }
@@ -314,7 +356,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 1st Upgrade
                     app->units[i].atk = 100;
                     break;
             }
@@ -322,7 +364,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 2nd Upgrade
                     app->units[i].baseRange = 4;
                     break;
             }
@@ -330,7 +372,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 3rd Upgrade
                     if (app->units[i].currentHP == app->units[i].maxHP) app->units[i].currentHP = 75;
                     app->units[i].maxHP = 75;
                     break;
@@ -344,7 +386,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 1st Upgrade
                     app->units[i].mvm = 7;
                     break;
             }
@@ -352,7 +394,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 2nd Upgrade
                     app->units[i].atk = 125;
                     break;
             }
@@ -360,7 +402,7 @@ void upgradeUnits(AppState *app, int t)
             {
                 case 0:
                     break;
-                case 1:
+                case 1: // 3rd Upgrade
                     app->units[i].baseRange = 2;
                     break;
             }

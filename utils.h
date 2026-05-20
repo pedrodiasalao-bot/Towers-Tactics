@@ -43,6 +43,7 @@ typedef enum {
     STATE_PLAYING,
     STATE_SPAWN_UNIT,
     STATE_GAME_OVER,
+    STATE_SKILL_MENU,
 
 }GameState;
 
@@ -83,6 +84,7 @@ typedef struct AppState
     SDL_Texture *uiSkillTree;
     SDL_Texture *uiSkillTreeHover;
     SDL_Texture *uiExperiencePoint;
+    SDL_Texture *skillTreeMenuBase;
 
     /* Camera */
     float cameraX;
@@ -106,6 +108,8 @@ typedef struct AppState
 
     bool isASingleUnitStandingInPoint;
     int capPointProgress[9];
+    int team0SkillPoints;
+    int team1SkillPoints;
     
     /* Timing */
     Uint64 lastTicksMS;

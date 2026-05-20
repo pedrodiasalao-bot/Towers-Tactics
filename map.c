@@ -1,6 +1,43 @@
 #include "utils.h"
 #include "map.h"
 
+//DEBUG
+static void drawText(
+    SDL_Renderer* renderer,
+    float x,
+    float y,
+    float scale,
+    Uint8 r,
+    Uint8 g,
+    Uint8 b,
+    Uint8 a,
+    const char* text
+)
+{
+    float oldX, oldY;
+    Uint8 oldR, oldG, oldB, oldA;
+
+    SDL_GetRenderScale(renderer, &oldX, &oldY);
+    SDL_GetRenderDrawColor(renderer, &oldR, &oldG, &oldB, &oldA);
+
+    SDL_SetRenderScale(renderer, scale, scale);
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+    SDL_RenderDebugTextFormat(
+        renderer,
+        x / scale,
+        y / scale,
+        "%s",
+        text
+    );
+
+    // Restore previous state
+    SDL_SetRenderScale(renderer, oldX, oldY);
+    SDL_SetRenderDrawColor(renderer, oldR, oldG, oldB, oldA);
+}
+//DEBUG
+
+
 char map[MAP_ROWS][MAP_COLS];
 /*
 MAP TILES:
@@ -194,11 +231,13 @@ void captureProgress (int pointY, int pointX, AppState *app, int capPointID)
                     {
                         map[pointY][pointX] = '2';
                         app->capPointProgress[capPointID] = 0;
+                        app->team0SkillPoints++;
                     }
                     if (app->units[i].team == 1)
                     {
                         map[pointY][pointX] = '3';
                         app->capPointProgress[capPointID] = 0;
+                        app->team1SkillPoints++;
                     }
                 }
                 // capture progress
@@ -222,6 +261,7 @@ void captureProgress (int pointY, int pointX, AppState *app, int capPointID)
                     {
                         map[pointY][pointX] = '3';
                         app->capPointProgress[capPointID] = 0;
+                        app->team1SkillPoints++;
                     }
                 }
                 // capture progress
@@ -245,6 +285,7 @@ void captureProgress (int pointY, int pointX, AppState *app, int capPointID)
                     {
                         map[16][1] = '2';
                         app->capPointProgress[capPointID] = 0;
+                        app->team0SkillPoints++;
                     }
                 }
                 // capture progress
