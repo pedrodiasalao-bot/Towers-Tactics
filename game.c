@@ -119,7 +119,7 @@ void renderUI(AppState *app){
                     app->input.mouseY >= buttonRect.y && 
                     app->input.mouseY <= buttonRect.y + buttonRect.h);
 
-    if(hovered){
+    if(hovered && app->currentState != STATE_SKILL_MENU){
     SDL_RenderTexture(app->renderer, app->uiSettingsHover, NULL, &buttonRect);
     }else{
     SDL_RenderTexture(app->renderer, app->uiSettings, NULL, &buttonRect);
@@ -146,7 +146,7 @@ void renderUI(AppState *app){
                     app->input.mouseY <= treeRect.y + treeRect.h);
 
   
-    if (treeHovered && app->selectedIndex != -1) {
+    if (treeHovered && (app->selectedIndex != -1 || app->currentState == STATE_SKILL_MENU)) {
         SDL_SetTextureAlphaMod(app->uiSkillTreeHover, alphaValue);
         SDL_RenderTexture(app->renderer, app->uiSkillTreeHover, NULL, &treeRect);
           }
@@ -304,6 +304,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     app->uiSkillTreeHover = sdl_load_texture(app->renderer, "Assets/Art/UI_SkillTreeHover.png");
     app->uiExperiencePoint = sdl_load_texture(app->renderer, "Assets/Art/UI_ExperiencePoint.png");
     app->skillTreeMenuBase = sdl_load_texture(app->renderer, "Assets/Art/skillTree.png");
+    app->skillTreeMenuSelection = sdl_load_texture(app->renderer, "Assets/Art/skillSelection.png");
 
 
     app->font = TTF_OpenFont("Assets/PressStart2P.ttf", 24);
@@ -336,6 +337,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     set_nearest(app->uiSkillTreeHover);
     set_nearest(app->uiExperiencePoint);
     set_nearest(app->skillTreeMenuBase);
+    set_nearest(app->skillTreeMenuSelection);
 
     /* PROTOTYPE ONLY */
     loadMap("map.txt");
@@ -466,14 +468,23 @@ case SDL_EVENT_MOUSE_WHEEL:
             return SDL_APP_CONTINUE;
         }
 
-        if (app->currentState == STATE_MENU || app->currentState == STATE_PAUSE) {
-          if (event->button.button == SDL_BUTTON_LEFT)
-        {   
-            app->currentState = STATE_PLAYING;
+        if (app->currentState == STATE_MENU || app->currentState == STATE_PAUSE)
+        {
+            if (event->button.button == SDL_BUTTON_LEFT)
+            {
+                app->currentState = STATE_PLAYING;
+            }
         }
-        
 
-    }else if (app->currentState == STATE_PLAYING){
+        if (app->currentState == STATE_SKILL_MENU)
+        {
+            if (event->button.button == SDL_BUTTON_LEFT)
+            {
+                app->currentState = STATE_PLAYING;
+            }
+        }
+
+    else if (app->currentState == STATE_PLAYING){
             if (!in->mouseLeftDown) in->mouseLeftPressed = true;
             in->mouseLeftDown = true;
 
@@ -484,6 +495,19 @@ case SDL_EVENT_MOUSE_WHEEL:
                 event->button.y >= buttonRect.y && 
                 event->button.y <= buttonRect.y + buttonRect.h) {
                     app->currentState = STATE_PAUSE;
+                    return SDL_APP_CONTINUE;
+                }
+            
+            float treeW = TEXTURE_WIDTH * 3.0f;
+            float treeH = TEXTURE_HEIGHT * 3.0f;
+            SDL_FRect treeRect = {WINDOW_WIDTH - treeW, WINDOW_HEIGHT - treeH, treeW, treeH};
+
+            if (event->button.x >= treeRect.x && 
+                event->button.x <= treeRect.x + treeRect.w &&
+                event->button.y >= treeRect.y && 
+                event->button.y <= treeRect.y + treeRect.h &&
+                app->selectedIndex != -1) {
+                    app->currentState = STATE_SKILL_MENU;
                     return SDL_APP_CONTINUE;
                 }
 
@@ -648,10 +672,68 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         SDL_FRect screenOverlay = {0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT};
         SDL_RenderFillRect(app->renderer, &screenOverlay);
 
-        drawText(app->renderer, WINDOW_WIDTH/2 - 110, WINDOW_HEIGHT/2, 3.0f, 255, 255, 255, 255, "CONTINUE");
-
-        SDL_FRect skillTreeRect = {100.0f, 100.0f, 200.0f, 200.0f};
+        SDL_FRect skillTreeRect = {300.0f, 50.0f, 800.0f, 800.0f};
         SDL_RenderTexture(app->renderer, app->skillTreeMenuBase, NULL, &skillTreeRect);
+
+        SDL_FRect skillTreeCharacterRect = {325.0f, 410.0f, 80.0f, 80.0f};
+        // Knight skill tree
+        if (app->units[app->selectedIndex].class == 1)
+        {
+            drawText(app->renderer, 780, 165, 4, 255, 255, 255, 255, "+ Health");
+            drawText(app->renderer, 780, 435, 4, 255, 255, 255, 255, "+ Attack");
+            drawText(app->renderer, 780, 705, 3, 255, 255, 255, 255, "+ ATK Range");
+
+            if (app->units[app->selectedIndex].team == 0) SDL_RenderTexture(app->renderer, app->spriteKnightBlue, NULL, &skillTreeCharacterRect);
+            if (app->units[app->selectedIndex].team == 1) SDL_RenderTexture(app->renderer, app->spriteKnightRed, NULL, &skillTreeCharacterRect);
+        }
+        // Archer skill tree
+        if (app->units[app->selectedIndex].class == 2)
+        {
+            drawText(app->renderer, 780, 165, 4, 255, 255, 255, 255, "+ Attack");
+            drawText(app->renderer, 780, 437, 3, 255, 255, 255, 255, "+ ATK Range");
+            drawText(app->renderer, 780, 705, 3, 255, 255, 255, 255, "+ Movement");
+
+            if (app->units[app->selectedIndex].team == 0) SDL_RenderTexture(app->renderer, app->spriteArcherBlue, NULL, &skillTreeCharacterRect);
+            if (app->units[app->selectedIndex].team == 1) SDL_RenderTexture(app->renderer, app->spriteArcherRed, NULL, &skillTreeCharacterRect);
+        }
+        // Cavalry skill tree
+        if (app->units[app->selectedIndex].class == 3)
+        {
+            drawText(app->renderer, 780, 170, 3, 255, 255, 255, 255, "+ Movement");
+            drawText(app->renderer, 780, 435, 4, 255, 255, 255, 255, "+ Attack");
+            drawText(app->renderer, 780, 705, 4, 255, 255, 255, 255, "+ Health");
+
+            if (app->units[app->selectedIndex].team == 0) SDL_RenderTexture(app->renderer, app->spriteCavBlue, NULL, &skillTreeCharacterRect);
+            if (app->units[app->selectedIndex].team == 1) SDL_RenderTexture(app->renderer, app->spriteCavRed, NULL, &skillTreeCharacterRect);
+        }
+
+        // Selection png
+        int selectionMult = 130;
+        SDL_FRect selectionRect1 = {713, 117, selectionMult * 3, selectionMult};
+        SDL_FRect selectionRect2 = {713, 385, selectionMult * 3, selectionMult};
+        SDL_FRect selectionRect3 = {713, 653, selectionMult * 3, selectionMult};
+
+        bool hovered1 = (app->input.mouseX >= selectionRect1.x && 
+                         app->input.mouseX <= selectionRect1.x + selectionRect1.w &&
+                         app->input.mouseY >= selectionRect1.y && 
+                         app->input.mouseY <= selectionRect1.y + selectionRect1.h);
+
+        bool hovered2 = (app->input.mouseX >= selectionRect2.x && 
+                         app->input.mouseX <= selectionRect2.x + selectionRect2.w &&
+                         app->input.mouseY >= selectionRect2.y && 
+                         app->input.mouseY <= selectionRect2.y + selectionRect2.h);
+
+        bool hovered3 = (app->input.mouseX >= selectionRect3.x && 
+                         app->input.mouseX <= selectionRect3.x + selectionRect3.w &&
+                         app->input.mouseY >= selectionRect3.y && 
+                         app->input.mouseY <= selectionRect3.y + selectionRect3.h);
+
+        SDL_FRect selectionRect = {732, 134, (selectionMult * 3) * 0.902, (selectionMult) * 0.74};
+        SDL_RenderTexture(app->renderer, app->skillTreeMenuSelection, NULL, &selectionRect);
+
+        SDL_SetTextureAlphaMod(app->skillTreeMenuSelection, 255);
+
+        if (hovered1 && app->units[app->selectedIndex].skillBranch1 != 1);
     }
 
     SDL_RenderPresent(app->renderer);
@@ -684,6 +766,7 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
     if (app->tileHigh) SDL_DestroyTexture(app->tileHigh);
     if (app->spriteSBKnightRed) SDL_DestroyTexture(app->spriteSBKnightRed);
     if (app->skillTreeMenuBase) SDL_DestroyTexture(app->skillTreeMenuBase);
+    if (app->skillTreeMenuSelection) SDL_DestroyTexture(app->skillTreeMenuSelection);
 
     if (app->uiSettings) SDL_DestroyTexture(app->uiSettings);
 

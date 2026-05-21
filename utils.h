@@ -85,6 +85,7 @@ typedef struct AppState
     SDL_Texture *uiSkillTreeHover;
     SDL_Texture *uiExperiencePoint;
     SDL_Texture *skillTreeMenuBase;
+    SDL_Texture *skillTreeMenuSelection;
 
     /* Camera */
     float cameraX;

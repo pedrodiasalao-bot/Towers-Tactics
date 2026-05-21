@@ -373,8 +373,7 @@ void upgradeUnits(AppState *app, int t)
                 case 0:
                     break;
                 case 1: // 3rd Upgrade
-                    if (app->units[i].currentHP == app->units[i].maxHP) app->units[i].currentHP = 75;
-                    app->units[i].maxHP = 75;
+                    app->units[i].mvm = 5;
                     break;
             }
         }
